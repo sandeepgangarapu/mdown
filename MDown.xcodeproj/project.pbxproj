@@ -24,6 +24,7 @@
 		F0000000000000000000004B /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000004A /* Typography.swift */; };
 		F00000000000000000000052 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = F00000000000000000000051 /* Sparkle */; };
 		F00000000000000000000054 /* AppUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000053 /* AppUpdater.swift */; };
+		F00000000000000000000056 /* DefaultMarkdownHelp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000055 /* DefaultMarkdownHelp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		F00000000000000000000044 /* FormatToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatToolbar.swift; sourceTree = "<group>"; };
 		F0000000000000000000004A /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		F00000000000000000000053 /* AppUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdater.swift; sourceTree = "<group>"; };
+		F00000000000000000000055 /* DefaultMarkdownHelp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultMarkdownHelp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				F00000000000000000000053 /* AppUpdater.swift */,
+				F00000000000000000000055 /* DefaultMarkdownHelp.swift */,
 				F00000000000000000000042 /* OpenDocuments.swift */,
 				F00000000000000000000040 /* MDownCommands.swift */,
 				F00000000000000000000001 /* MDownApp.swift */,
@@ -218,6 +221,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F00000000000000000000054 /* AppUpdater.swift in Sources */,
+				F00000000000000000000056 /* DefaultMarkdownHelp.swift in Sources */,
 				F0000000000000000000004B /* Typography.swift in Sources */,
 				F00000000000000000000045 /* FormatToolbar.swift in Sources */,
 				F00000000000000000000043 /* OpenDocuments.swift in Sources */,

@@ -99,6 +99,7 @@ struct EditorView: View {
             OpenDocuments.shared.update(id: documentID, fileURL: url)
         }
         .onChange(of: document.text) { old, new in
+            tracker.requestedHeadingLocation = nil
             documentChanged(from: old, to: new)
         }
         .onAppear {
@@ -156,6 +157,20 @@ struct EditorView: View {
                 .scrollEdgeEffectStyle(.soft, for: .top)
                 .onScrollTargetVisibilityChange(idType: PageRowID.self, threshold: 0.01) { ids in
                     tracker.topVisibleLocation = topLocation(of: ids)
+                }
+                .onScrollGeometryChange(for: Bool.self) { geometry in
+                    // A short final section cannot always reach the top of the viewport.
+                    // Do not treat a document that fits without scrolling as being at its end.
+                    geometry.visibleRect.minY > 0
+                        && geometry.contentSize.height > geometry.visibleRect.height + 1
+                        && geometry.visibleRect.maxY >= geometry.contentSize.height - 1
+                } action: { _, isAtBottom in
+                    tracker.isAtBottom = isAtBottom
+                }
+                .onScrollPhaseChange { _, phase in
+                    if phase == .tracking || phase == .interacting {
+                        tracker.requestedHeadingLocation = nil
+                    }
                 }
                 .onChange(of: scrollRequest) { _, request in
                     guard let request else { return }
@@ -236,6 +251,7 @@ struct EditorView: View {
         }
         findIndex = next
         finishEditing()
+        tracker.requestedHeadingLocation = nil
         scrollRequest = ScrollRequest(id: rowID(forLocation: matches[next].utf16Location), anchor: .center)
     }
 
@@ -543,6 +559,7 @@ struct EditorView: View {
     }
 
     private func scroll(toHeading entry: OutlineEntry) {
+        tracker.requestedHeadingLocation = entry.utf16Location
         scrollRequest = ScrollRequest(id: rowID(forLocation: entry.utf16Location), anchor: .top)
     }
 

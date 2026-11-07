@@ -9,6 +9,9 @@ import SwiftUI
 @Observable
 final class PageTracker {
     var topVisibleLocation: Int?
+    var isAtBottom = false
+    /// Keep a clicked heading active when the end of the page prevents top alignment.
+    var requestedHeadingLocation: Int?
 }
 
 private enum SidebarItem: Hashable {
@@ -111,6 +114,7 @@ struct Sidebar: View {
                 .buttonStyle(.borderless)
                 .help("New Document")
                 Spacer()
+                DefaultMarkdownHelpButton()
                 UpdateButton()
             }
             .padding(.horizontal, 16)
@@ -126,8 +130,14 @@ struct Sidebar: View {
     }
 
     private var currentHeading: Int? {
-        guard let anchor = editingLocation ?? tracker.topVisibleLocation else { return outline.first?.id }
-        return outline.last(where: { $0.utf16Location <= anchor })?.id ?? outline.first?.id
+        if let anchor = tracker.requestedHeadingLocation ?? editingLocation {
+            return MarkdownOutline.activeEntry(in: outline, at: anchor)?.id
+        }
+        return MarkdownOutline.activeEntry(
+            in: outline,
+            at: tracker.topVisibleLocation,
+            reachedEnd: tracker.isAtBottom
+        )?.id
     }
 
     private func handle(_ item: SidebarItem?) {

@@ -14,6 +14,18 @@ public struct OutlineEntry: Hashable, Sendable, Identifiable {
 }
 
 public enum MarkdownOutline {
+    /// The section being read. At the bottom, the final section wins even if part of the
+    /// preceding block remains visible because there is no more room to scroll.
+    public static func activeEntry(
+        in entries: [OutlineEntry],
+        at location: Int?,
+        reachedEnd: Bool = false
+    ) -> OutlineEntry? {
+        if reachedEnd { return entries.last }
+        guard let location else { return entries.first }
+        return entries.last(where: { $0.utf16Location <= location }) ?? entries.first
+    }
+
     /// Top-level headings, in source order.
     public static func entries(from blocks: [SourcedBlock]) -> [OutlineEntry] {
         blocks.compactMap {
