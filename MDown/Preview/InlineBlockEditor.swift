@@ -171,7 +171,6 @@ private struct InlineTextRepresentable: NSViewRepresentable {
                 textView.setSelectedRange(clamped(parent.selection, in: textView.string))
                 isUpdatingFromModel = false
                 focus(textView)
-                textView.scrollRangeToVisible(textView.selectedRange())
             } else if textView.string != parent.text {
                 let selected = textView.selectedRange()
                 isUpdatingFromModel = true
