@@ -1,5 +1,8 @@
 <?xml version="1.0" ?><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
-  <channel><item><title>MDown 1.1</title><pubDate>Sat, 07 Nov 2026 03:30:07 GMT</pubDate><sparkle:version>3</sparkle:version><sparkle:shortVersionString>1.1</sparkle:shortVersionString><sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion><description><![CDATA[<ul>
+  <channel><item><title>MDown 1.1.1</title><pubDate>Sat, 07 Nov 2026 03:59:21 GMT</pubDate><sparkle:version>4</sparkle:version><sparkle:shortVersionString>1.1.1</sparkle:shortVersionString><sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion><description><![CDATA[<ul>
+<li>Opening a block for editing no longer makes the page jump.</li>
+</ul>
+]]></description><enclosure url="https://github.com/sandeepgangarapu/mdown/releases/download/v1.1.1/MDown.dmg" length="3975066" type="application/octet-stream" sparkle:edSignature="zp5pMj4FqlUKoPyf6Z6qGZ8ylAjT1vOBy6PxyDEiW7lL42M8iI+bib6LRVnjvqW3gBrX6OQ8e2/1mUGlL8k4Ag=="/></item><item><title>MDown 1.1</title><pubDate>Sat, 07 Nov 2026 03:30:07 GMT</pubDate><sparkle:version>3</sparkle:version><sparkle:shortVersionString>1.1</sparkle:shortVersionString><sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion><description><![CDATA[<ul>
 <li><strong>MDown now updates itself.</strong> It checks once a day, and you can check any time from MDown &gt; Check for Updates… or with the button beside New Document in the sidebar.</li>
 <li>When a new version is ready, that button turns into an orange arrow. Click it to see what's new and install.</li>
 </ul>
