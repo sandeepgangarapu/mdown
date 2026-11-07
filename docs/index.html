@@ -10,12 +10,12 @@
   document.documentElement.classList.add(/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints < 2 ? "is-mac" : "not-mac");
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MDown, the simplest and cleanest Markdown editor in the world</title>
-<meta name="description" content="MDown is a free, open-source, native Mac Markdown editor. AI speaks Markdown, and MDown makes every page easy to read and one click away from editing.">
+<title>MDown — Read Markdown. Edit when you need to.</title>
+<meta name="description" content="We read Markdown more than we edit it. MDown opens it instantly as a clean page. Free, open source, and native to Mac. No accounts, sync, or vaults.">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="MDown, the simplest and cleanest Markdown editor in the world">
-<meta property="og:description" content="Free, open source, native Swift. Easy to read, one click to edit.">
+<meta property="og:title" content="MDown — Read Markdown. Edit when you need to.">
+<meta property="og:description" content="Opens instantly as a clean page. Free, open source, and native to Mac. No accounts, sync, or vaults.">
 <meta property="og:url" content="https://mdown.sandeepgangarapu.com/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -24,7 +24,7 @@
 <meta property="og:image" content="https://mdown.sandeepgangarapu.com/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="MDown — The simplest and cleanest Markdown editor in the world. Free, open source, and built with native Swift for Mac.">
+<meta property="og:image:alt" content="MDown — Read Markdown. Edit when you need to. Free, open source, native Swift for Mac.">
 <meta name="twitter:image" content="https://mdown.sandeepgangarapu.com/assets/og.png">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="icon" type="image/png" sizes="64x64" href="/assets/favicon.png">
@@ -131,11 +131,11 @@
   }
 
   /* Hero */
-  .hero { padding: clamp(48px, 9vw, 120px) 0 clamp(64px, 8vw, 112px); }
+  .hero { padding: clamp(48px, 7vw, 80px) 0 clamp(56px, 7vw, 88px); }
   h1 {
     margin: 0;
-    max-width: 16ch;
-    font-size: clamp(42px, 6.6vw, 84px);
+    max-width: 22ch;
+    font-size: clamp(38px, 6.6vw, 76px);
     line-height: 1.0;
     font-weight: 700;
     letter-spacing: -0.038em;
@@ -179,7 +179,7 @@
   .stars { font-weight: 500; color: var(--muted); }
 
   /* Hero: the page, then the same page with one block opened, on a loop. */
-  .shot { margin: clamp(48px, 7vw, 88px) auto 0; max-width: 1240px; padding: 0 clamp(8px, 3vw, 40px); }
+  .shot { margin: clamp(40px, 6vw, 64px) auto 0; max-width: 1240px; padding: 0 clamp(8px, 3vw, 40px); }
   .loop {
     position: relative;
     filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.18)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.10));
@@ -219,7 +219,7 @@
   }
 
   /* Sections */
-  section { padding: clamp(72px, 10vw, 136px) 0; }
+  section { padding: clamp(56px, 7vw, 88px) 0; }
   h2 {
     margin: 0;
     max-width: 18ch;
@@ -230,13 +230,7 @@
   }
   .section-intro { margin: 22px 0 0; max-width: var(--measure); font-size: 20px; line-height: 1.5; color: var(--muted); }
 
-  .problem { background: var(--canvas); }
   .try, .compare { background: var(--canvas); }
-  .problem .columns { display: grid; gap: 28px 64px; margin-top: 40px; max-width: 980px; }
-  @media (min-width: 820px) { .problem .columns { grid-template-columns: 1fr 1fr; } }
-  .problem p { margin: 0; font-size: 20px; line-height: 1.55; }
-  .problem p + p { color: var(--muted); }
-  .problem .columns p:last-child { color: var(--ink); }
 
   /* Live demo */
   .demo-layout { display: grid; gap: 40px 72px; align-items: start; }
@@ -323,7 +317,7 @@
 
   /* Features */
   .features { background: var(--page); }
-  .feature-list { display: grid; gap: 40px 72px; margin: 56px 0 0; }
+  .feature-list { display: grid; gap: 28px 56px; margin: 36px 0 0; }
   @media (min-width: 760px) { .feature-list { grid-template-columns: 1fr 1fr; } }
   @media (min-width: 1100px) { .feature-list { grid-template-columns: 1fr 1fr 1fr; } }
   .feature-list dt { font-size: 20px; font-weight: 650; letter-spacing: -0.012em; display: flex; align-items: center; gap: 10px; }
@@ -364,7 +358,7 @@
   .terminal .copy:hover { box-shadow: 0 0 0 1px var(--muted); }
 
   /* Comparison */
-  .compare-table { width: 100%; max-width: 980px; margin: 48px 0 0; border-collapse: collapse; font-size: 16px; }
+  .compare-table { width: 100%; max-width: 980px; margin: 32px 0 0; border-collapse: collapse; font-size: 16px; }
   .compare-table caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .compare-table th, .compare-table td { padding: 15px 18px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
   .compare-table thead th { font-size: 14px; font-weight: 600; color: var(--muted); border-bottom-width: 1.5px; }
@@ -441,8 +435,13 @@
 
   @media (max-width: 560px) {
     .site-nav .hide-small { display: none; }
+    h1 { font-size: 34px; }
+    .compare-table { font-size: 14px; }
+    .compare-table th, .compare-table td { padding: 12px 6px; }
+    .compare-table thead th { font-size: 12px; }
     .button { width: 100%; justify-content: center; }
   }
+  h1 .keep-together { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -461,24 +460,24 @@
 <main>
   <div class="hero">
     <div class="wrap">
-      <h1 class="md-heading"><span class="md-mark" aria-hidden="true">#</span>The simplest and cleanest Markdown editor in the world.</h1>
-      <p class="lede">AI writes in Markdown. MDown makes it easy to read and puts editing one click away.</p>
+      <h1 class="md-heading"><span class="md-mark" aria-hidden="true">#</span>Read Markdown.<br>Edit when you <span class="keep-together">need to.</span></h1>
+      <p class="lede">We read Markdown more than we edit it. MDown opens it instantly as a clean page.</p>
       <div class="actions mac-only">
         <a class="button button-primary" href="https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
           Download for Mac
         </a>
-        <a class="button button-quiet" href="https://github.com/sandeepgangarapu/mdown">View source on GitHub<span class="stars" data-stars hidden></span></a>
+        <a class="button button-quiet" href="https://github.com/sandeepgangarapu/mdown">View source<span class="stars" data-stars hidden></span></a>
       </div>
-      <p class="release-meta mac-only"><span data-release-line>MDown 1.1 is a 4 MB download for macOS 26 or later.</span> <a href="#first-launch">The first launch takes one extra click.</a></p>
+      <p class="release-meta mac-only"><span data-release-line>MDown 1.1.1 · 4 MB · macOS 26+</span> · <a href="#first-launch">First launch help</a></p>
       <div class="actions other-only">
-        <p class="other-note">MDown is a Mac app. Send yourself the link and open it on your Mac.</p>
+        <p class="other-note">For Mac. Save the link for later.</p>
         <button class="button button-primary" type="button" data-share>Copy link</button>
       </div>
       <ul class="facts">
         <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Free</li>
-        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Open source, MIT licensed</li>
-        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Native Swift, made for macOS</li>
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Open source</li>
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Native Swift</li>
       </ul>
     </div>
     <div class="shot">
@@ -497,26 +496,16 @@
         </picture>
         <svg class="cursor" viewBox="0 0 22 30" aria-hidden="true"><path d="M2 2v22.5l5.6-5.4 3.9 8.9 3.7-1.6-3.8-8.6H19z" fill="#000" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
       </div>
-      <p class="loop-caption">Click a block to see its Markdown. Click away and it sets again. <a href="#try">Try it on this page.</a></p>
+      <p class="loop-caption">One click to edit. Click away to read. <a href="#try">Try it.</a></p>
     </div>
   </div>
-
-  <section class="problem" aria-labelledby="problem-title">
-    <div class="wrap">
-      <h2 class="md-heading" id="problem-title"><span class="md-mark" aria-hidden="true">##</span>Everything else is too much.</h2>
-      <div class="columns">
-        <p>Other editors keep your writing in their own database, behind an account, a sync service, and a plugin store. Or they’re expensive. Or they’re just too complex.</p>
-        <p>Working with AI needs less. You open a .md file, read what the model wrote, fix a line, and hand it back. MDown does exactly that, then gets out of the way.</p>
-      </div>
-    </div>
-  </section>
 
   <section class="try" id="try" aria-labelledby="try-title">
     <div class="wrap demo-layout">
       <div>
-        <h2 class="md-heading" id="try-title"><span class="md-mark" aria-hidden="true">##</span>Click a line to see how it’s written.</h2>
-        <p class="section-intro">Every block on an MDown page is real Markdown. Click one and it turns into its source, right where it was. Change it, then click away and it sets again.</p>
-        <p class="demo-hint">Try it on this page. Press <kbd>esc</kbd> or click outside to finish.</p>
+        <h2 class="md-heading" id="try-title"><span class="md-mark" aria-hidden="true">##</span>Try a quick edit.</h2>
+        <p class="section-intro">Click a block. Edit the Markdown. Click away to read.</p>
+        <p class="demo-hint"><kbd>esc</kbd> works too.</p>
       </div>
       <div class="demo-page" id="demo" aria-label="Live MDown page"></div>
     </div>
@@ -528,27 +517,27 @@
       <dl class="feature-list">
         <div>
           <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Your files stay files</dt>
-          <dd>Plain .md files on disk. No database, no account, no sync service. Git, your terminal, and your AI tools all read the same file you do.</dd>
+          <dd>Plain .md files. No accounts, sync, or vaults.</dd>
         </div>
         <div>
           <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Native and quick</dt>
-          <dd>Written in Swift with SwiftUI and AppKit. It opens instantly, stays light on memory, and behaves like the rest of your Mac.</dd>
+          <dd>Opens instantly. Feels like your Mac.</dd>
         </div>
         <div>
           <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>Edit in place</dt>
-          <dd>Click any block to edit its Markdown. Return starts a new paragraph or list item, Tab nests a list, and the arrow keys move between blocks.</dd>
+          <dd>Click a block to edit. Click away to read.</dd>
         </div>
         <div>
           <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg>Every open file in view</dt>
-          <dd>The sidebar lists your open documents, the current one’s headings, and recent files. Switch with a click, jump to any section.</dd>
+          <dd>Open files and headings, together in the sidebar.</dd>
         </div>
         <div>
           <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M8 14h8"/></svg>Shortcuts you already know</dt>
-          <dd>Title, Heading, Body, and Checklist use the same keys as Notes. Bold is ⌘B, a link is ⌘K, and Find is ⌘F.</dd>
+          <dd>⌘B for bold. ⌘K for links. ⌘F to find.</dd>
         </div>
         <div>
           <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/></svg>Free and open source</dt>
-          <dd>MIT licensed and built in the open. MDown checks for new versions and updates itself in one click.</dd>
+          <dd>MIT licensed. Automatic updates included.</dd>
         </div>
       </dl>
     </div>
@@ -564,13 +553,11 @@
             <tr><td></td><th scope="col">Note apps</th><th scope="col">Code editors</th><th scope="col" class="us">MDown</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row">Free</th><td>Often paid</td><td>Usually</td><td class="us">Yes</td></tr>
-            <tr><th scope="row">Native Mac app</th><td>Some</td><td>Rarely</td><td class="us">Yes</td></tr>
-            <tr><th scope="row">Plain .md files on your disk</th><td>Some</td><td>Yes</td><td class="us">Yes</td></tr>
-            <tr><th scope="row">No account needed</th><td>Rarely</td><td>Yes</td><td class="us">Yes</td></tr>
-            <tr><th scope="row">Reads like a finished page</th><td>Yes</td><td>In a preview pane</td><td class="us">Yes</td></tr>
-            <tr><th scope="row">Edit the Markdown in place</th><td>No</td><td>In a split view</td><td class="us">One click</td></tr>
-            <tr><th scope="row">Download size</th><td>Often 100 MB or more</td><td>Often 100 MB or more</td><td class="us">About 4 MB</td></tr>
+            <tr><th scope="row">Opens instantly</th><td>Varies</td><td>Varies</td><td class="us">Yes</td></tr>
+            <tr><th scope="row">Opens ready to read</th><td>Varies</td><td>Preview mode</td><td class="us">Yes</td></tr>
+            <tr><th scope="row">Free</th><td>Varies</td><td>Varies</td><td class="us">Yes</td></tr>
+            <tr><th scope="row">Account, sync, or vault</th><td>Varies</td><td>Varies</td><td class="us">None needed</td></tr>
+            <tr><th scope="row">Main purpose</th><td>Notes</td><td>Code</td><td class="us">Markdown</td></tr>
           </tbody>
         </table>
       </div>
@@ -580,7 +567,7 @@
   <section class="privacy" aria-labelledby="privacy-title">
     <div class="wrap">
       <h2 class="md-heading" id="privacy-title"><span class="md-mark" aria-hidden="true">##</span>Your words stay on your Mac.</h2>
-      <p class="privacy-statement">No account. No tracking. No cloud of its own. MDown reads and writes plain files on your disk, and only goes online to check for updates and to load images your documents link to.</p>
+      <p class="privacy-statement">No account or tracking. Only update checks and linked images use the internet.</p>
     </div>
   </section>
 
@@ -597,16 +584,15 @@
           <a class="button button-quiet" href="https://github.com/sandeepgangarapu/mdown/releases">All releases</a>
         </div>
         <div class="actions other-only">
-          <p class="other-note">MDown runs on Macs with macOS 26 or later. Send yourself the link for later.</p>
+          <p class="other-note">For macOS 26+. Save the link for later.</p>
           <button class="button button-primary" type="button" data-share>Copy link</button>
         </div>
         <ul class="requirements">
-          <li data-release-line>MDown 1.1 is a 4 MB download for macOS 26 or later.</li>
-          <li>Runs natively on Apple silicon and Intel.</li>
-          <li>Updates itself when a new version is out.</li>
+          <li data-release-line>MDown 1.1.1 · 4 MB · macOS 26+</li>
+          <li>Apple silicon and Intel. Automatic updates.</li>
         </ul>
         <details class="whats-new" data-whats-new hidden>
-          <summary>What’s new in MDown <span data-version>1.1</span></summary>
+          <summary>What’s new in MDown <span data-version>1.1.1</span></summary>
           <div class="notes" data-notes></div>
         </details>
 
@@ -619,8 +605,8 @@
       </div>
     </div>
         <div class="wrap first-launch" id="first-launch">
-          <h3>The first time you open MDown</h3>
-          <p class="first-launch-intro">MDown isn’t notarized by Apple, so macOS asks you to confirm it once. It takes about ten seconds, and you never do it again.</p>
+          <h3>First launch</h3>
+          <p class="first-launch-intro">MDown isn’t notarized, so macOS asks you to confirm it once.</p>
           <ol class="steps">
             <li>
               <div class="mock" aria-hidden="true">
@@ -631,7 +617,7 @@
                   <span class="mock-buttons"><span class="mock-btn">Move to Trash</span><span class="mock-btn default ring">Done</span></span>
                 </div>
               </div>
-              <p><strong>Open MDown and click Done.</strong> macOS stops apps it hasn’t checked itself. That’s expected.</p>
+              <p><strong>Open MDown. Click Done.</strong></p>
             </li>
             <li>
               <div class="mock" aria-hidden="true">
@@ -641,7 +627,7 @@
                   <div class="row"><span>“MDown” was blocked to protect your Mac.</span><span class="mock-btn ring">Open Anyway</span></div>
                 </div>
               </div>
-              <p><strong>Click Open Anyway in System Settings.</strong> It’s under Privacy &amp; Security, near the bottom.</p>
+              <p><strong>Settings → Privacy &amp; Security.</strong> Scroll to Open Anyway.</p>
             </li>
             <li>
               <div class="mock" aria-hidden="true">
@@ -652,7 +638,7 @@
                   <span class="mock-buttons"><span class="mock-btn">Cancel</span><span class="mock-btn default ring">Open Anyway</span></span>
                 </div>
               </div>
-              <p><strong>Confirm once.</strong> From then on MDown opens like any other app, and updates install without asking again.</p>
+              <p><strong>Click Open Anyway and confirm.</strong> Use Touch ID or your password.</p>
             </li>
           </ol>
         </div>
@@ -661,7 +647,7 @@
 
 <footer>
   <div class="wrap">
-    <span>MDown is free and open source under the MIT License. Made by <a href="https://sandeepgangarapu.com">Sandeep Gangarapu</a>.</span>
+    <span>Made by <a href="https://sandeepgangarapu.com">Sandeep Gangarapu</a>.</span>
     <nav aria-label="Footer">
       <a href="https://github.com/sandeepgangarapu/mdown">GitHub</a>
       <a href="https://github.com/sandeepgangarapu/mdown/issues">Report an issue</a>
@@ -686,7 +672,7 @@
     if (version && bytes) {
       const mb = Math.max(1, Math.round(bytes / 1e6));
       document.querySelectorAll("[data-release-line]").forEach((node) => {
-        node.textContent = `MDown ${version} is a ${mb} MB download for macOS 26 or later.`;
+        node.textContent = `MDown ${version} · ${mb} MB · macOS 26+`;
       });
     }
     const whatsNew = document.querySelector("[data-whats-new]");
