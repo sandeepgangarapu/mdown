@@ -5,7 +5,7 @@
 <h1 align="center">MDown</h1>
 
 <p align="center">
-  The Markdown editor for working with AI.<br>
+  Read Markdown. Edit when you need to.<br>
   Free, open source, and native Swift.
 </p>
 
@@ -16,16 +16,25 @@
 
 ![MDown with an agent brief open. One paragraph shows its Markdown while the rest of the page stays typeset.](docs/assets/screenshot-light.png)
 
-Prompts, agent briefs, specs, and model output are all Markdown. The editors around it are either bloated or complex. MDown is a small native Mac app that keeps the page readable and puts the Markdown one click away.
+We use Markdown more than ever, because AI speaks it. Plans, prompts, notes, and the answers that come back are all Markdown now. Most of the time I'm just reading them. Sometimes I fix a line or two.
+
+Every app I tried had that backwards. They took forever to open a file, then opened it in edit mode, full of symbols. Some weren't free. Markdown wasn't really why they existed, so they came with accounts, sync, and vaults.
+
+So I made MDown the other way around. It opens a Markdown file instantly, as a clean page. When you want to change something, click it, and the Markdown behind that block appears. Click away, and it's a page again.
+
+MDown isn't trying to be the most powerful Markdown editor. It's trying to be the nicest place to read Markdown.
 
 ## What it does
 
-- **Edit in place.** The page stays typeset. Click any block to edit its Markdown right where it is, then click away or press Escape and it sets again.
-- **Your files stay files.** Plain `.md` files on disk. No database, no account, no sync service. Git, your terminal, and your AI tools read the same file you do.
-- **Writes like a word processor.** Return starts a new paragraph or list item, Return on an empty item ends the list, Tab nests a list item, and the arrow keys move between blocks.
-- **Every open file in view.** The sidebar lists your open documents, the current document's headings, and recent files.
-- **Shortcuts you already know.** Title (⇧⌘T), Heading (⇧⌘H), Body (⇧⌘B), Checklist (⇧⌘L), Bold (⌘B), Link (⌘K), and Find (⌘F), the same as Notes.
-- **Native.** SwiftUI and AppKit, system colors, light and dark appearance, and a 7 MB universal app.
+- Opens Markdown instantly, as a clean page.
+- Click any block to edit the Markdown behind it. Press Escape or click away to read.
+- Return, Tab, and the arrow keys do what you'd expect: new paragraphs, nested lists, the next block.
+- Lists your open files, the current file's headings, and recent files in the sidebar.
+- Uses shortcuts you already know: ⌘B, ⌘K, and ⌘F, plus ⇧⌘T, ⇧⌘H, ⇧⌘B, and ⇧⌘L for title, heading, body, and checklist, the same as Notes.
+- Works with plain `.md` files. No account, sync, or vault. Git, your terminal, and your AI tools read the same file you do.
+- Keeps your words on your Mac. Only update checks and linked images go online.
+
+That's it.
 
 ## Install
 
@@ -39,11 +48,15 @@ Or install it with [Homebrew](https://brew.sh):
 brew trust sandeepgangarapu/tap && brew install --cask sandeepgangarapu/tap/mdown
 ```
 
-MDown needs macOS 26 or later and runs natively on Apple silicon and Intel. Once installed, it checks for new versions and updates itself.
+MDown needs macOS 26 or later and runs natively on Apple silicon and Intel. It checks for new versions and updates itself.
 
-MDown isn't notarized by Apple yet, so macOS stops it the first time you open it. Open System Settings, go to Privacy & Security, and click Open Anyway next to MDown. You only need to do this once.
+MDown isn't notarized, so macOS asks you to confirm it once. Open System Settings, go to Privacy & Security, and click **Open Anyway** next to MDown. The [first launch guide](https://mdown.sandeepgangarapu.com/#first-launch) shows each step.
 
-## Build from source
+## It's yours too
+
+MDown is free and open source. Read the code, change what you don't like, and send your fixes back. If something is broken or missing, [open an issue](https://github.com/sandeepgangarapu/mdown/issues).
+
+### Build from source
 
 You need Xcode 26 or later.
 
@@ -67,27 +80,23 @@ Build the DMG (needs `pip install dmgbuild`):
 Packaging/make-dmg.sh
 ```
 
-Prepare a Sparkle-signed release and prepend its appcast entry (no publication):
+### Make a release
+
+Prepare a Sparkle-signed release and add its entry to the top of the appcast, without publishing:
 
 ```sh
 Packaging/release.sh 1.1.0 "Release notes (Markdown or HTML)"
 ```
 
-This increments the build number and updates the project version. The EdDSA key
-must be at `~/.config/mdown/sparkle_ed25519_private.key`. Install `cmark` (`brew install cmark`) for
-Markdown and HTML release notes. Review the DMG,
-project version, and `docs/appcast.xml` before publishing. From a clean checkout,
-`Packaging/release.sh --publish 1.1.0 "Notes"` also commits, rebases, pushes, and
-creates the GitHub release. Run either preparation or publication for a version,
-not both. The asset name remains `MDown.dmg`.
+This increments the build number and updates the project version. From a clean checkout, `Packaging/release.sh --publish 1.1.0 "Notes"` also commits, rebases, pushes, and creates the GitHub release. Run either preparation or publication for a version, not both.
 
-Build intermediates stay in temporary storage. Override `DERIVED_DATA_PATH`,
-`DMG_OUTPUT`, or `DMGBUILD` to select a scratch directory or a venv's `dmgbuild`.
-Packaging verifies the app's nested signatures again inside the finished DMG.
-Sparkle's shipped ad-hoc helper signatures are preserved; update archives are
-authenticated separately by EdDSA. No Developer ID or notarization is required.
+- The EdDSA key must be at `~/.config/mdown/sparkle_ed25519_private.key`.
+- Install `cmark` (`brew install cmark`) for Markdown and HTML release notes.
+- Review the DMG, the project version, and `docs/appcast.xml` before publishing. The asset name stays `MDown.dmg`.
+- Build intermediates stay in temporary storage. Set `DERIVED_DATA_PATH`, `DMG_OUTPUT`, or `DMGBUILD` to use a scratch folder or a venv's `dmgbuild`.
+- No Developer ID or notarization is required. Packaging checks the app's nested signatures again inside the finished DMG, Sparkle's ad-hoc helper signatures are kept, and update archives are verified separately with EdDSA.
 
-## Project layout
+### Project layout
 
 | Folder | What's in it |
 | --- | --- |
