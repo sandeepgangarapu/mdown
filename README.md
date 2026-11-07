@@ -33,7 +33,14 @@ Prompts, agent briefs, specs, and model output are all Markdown. The editors aro
 2. Open it and drag MDown to Applications.
 3. Open MDown from Applications.
 
-MDown needs macOS 26 or later and runs natively on Apple silicon and Intel.
+Or install it with [Homebrew](https://brew.sh):
+
+```sh
+brew trust sandeepgangarapu/tap
+brew install --cask sandeepgangarapu/tap/mdown
+```
+
+MDown needs macOS 26 or later and runs natively on Apple silicon and Intel. Once installed, it checks for new versions and updates itself.
 
 MDown isn't notarized by Apple yet, so macOS stops it the first time you open it. Open System Settings, go to Privacy & Security, and click Open Anyway next to MDown. You only need to do this once.
 

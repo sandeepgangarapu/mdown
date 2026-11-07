@@ -74,11 +74,19 @@ channel.insertBefore(item,channel.firstChild)
 p.write_text(doc.toxml()+'\n')
 PY
 xmllint --noout docs/appcast.xml
+# Keep the version in the website's structured data current.
+sed -i '' -E "s/\"softwareVersion\": \"[^\"]*\"/\"softwareVersion\": \"$version\"/" docs/index.html
 if $publish; then
-  git add MDown.xcodeproj/project.pbxproj docs/appcast.xml
+  git add MDown.xcodeproj/project.pbxproj docs/appcast.xml docs/index.html
   git commit -m "Release MDown $version"
   git pull --rebase
   git push
   gh release create "v$version" "$dmg#MDown.dmg" --title "MDown $version" --notes-file "$work/notes.md"
+  # Point the Homebrew cask (github.com/sandeepgangarapu/homebrew-tap) at the new DMG.
+  sha=$(shasum -a 256 "$dmg" | cut -d' ' -f1)
+  gh repo clone sandeepgangarapu/homebrew-tap "$work/tap" -- --quiet
+  sed -i '' -E "s/^  version \".*\"/  version \"$version\"/; s/^  sha256 \".*\"/  sha256 \"$sha\"/" "$work/tap/Casks/mdown.rb"
+  git -C "$work/tap" commit -qam "MDown $version"
+  git -C "$work/tap" push -q
 fi
 print "Prepared MDown $version ($build_number): $dmg"
