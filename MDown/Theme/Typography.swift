@@ -45,6 +45,7 @@ enum MDownSettings {
 
     static let defaultFontSize = 17.0
     static let defaultFace = PageFace.sans
+    static let defaultTheme = PageTheme.paper
     static let fontSizeRange: ClosedRange<Double> = 12...32
 }
 

@@ -1,18 +1,19 @@
 import AppKit
 import SwiftUI
 
-/// The page's background treatment. `standard` follows the system (white in Light Mode, near black
-/// in Dark Mode) and the user's accent color. `paper` is a warm, book-like page.
+/// The page's background treatment. `paper`, the default, is a warm, book-like page. `standard`
+/// ("Plain") follows the system (white in Light Mode, near black in Dark Mode) and the user's accent
+/// color. Raw values are stored in user defaults, so they must not change.
 enum PageTheme: String, CaseIterable, Identifiable {
-    case standard
     case paper
+    case standard
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .standard: "Default"
         case .paper: "Paper"
+        case .standard: "Plain"
         }
     }
 }

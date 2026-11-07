@@ -632,7 +632,7 @@ private struct MarkdownImage: View {
     ScrollView {
         MarkdownPage(
             blocks: MarkdownRenderModel.sourcedBlocks(from: WelcomeMarkdown.text),
-            style: PageStyle(size: 17, face: MDownSettings.defaultFace, colors: MDownPalette.colors(theme: .standard, scheme: .light)),
+            style: PageStyle(size: 17, face: MDownSettings.defaultFace, colors: MDownPalette.colors(theme: MDownSettings.defaultTheme, scheme: .light)),
             baseDirectory: nil
         )
         .padding(40)

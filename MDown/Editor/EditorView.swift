@@ -25,7 +25,7 @@ struct EditorView: View {
 
     @AppStorage(MDownSettings.fontSize) private var fontSize = MDownSettings.defaultFontSize
     @AppStorage(MDownSettings.face) private var face: PageFace = MDownSettings.defaultFace
-    @AppStorage(MDownSettings.theme) private var theme: PageTheme = .standard
+    @AppStorage(MDownSettings.theme) private var theme: PageTheme = MDownSettings.defaultTheme
     @AppStorage(MDownSettings.showWordCount) private var showWordCount = false
     @Environment(\.colorScheme) private var colorScheme
 
