@@ -2514,7 +2514,8 @@ function replaceInDocs(from, to) {
     const ns = "http://www.andymatuschak.org/xml-namespaces/sparkle";
     const version = item.getElementsByTagNameNS(ns, "shortVersionString")[0]?.textContent?.trim();
     const bytes = Number(item.querySelector("enclosure")?.getAttribute("length") || 0);
-    if (version && bytes) replaceInDocs("MDown 1.1.2 · 4 MB · macOS 26+", `MDown ${version} · ${Math.max(1, Math.round(bytes / 1e6))} MB · macOS 26+`);
+    const line = docs[0].original.match(/MDown [\d.]+ · \d+ MB · macOS 26\+/);
+    if (version && bytes && line) replaceInDocs(line[0], `MDown ${version} · ${Math.max(1, Math.round(bytes / 1e6))} MB · macOS 26+`);
   } catch {}
 })();
 
