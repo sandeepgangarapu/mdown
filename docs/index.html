@@ -419,14 +419,6 @@
   .mock-settings .row .mock-btn { flex: none; }
   .mock-settings .label { padding: 10px 12px 0; font-size: 10px; font-weight: 600; color: var(--muted); }
 
-  /* What's new */
-  .whats-new { margin: 22px 0 0; max-width: var(--measure); font-size: 16px; }
-  .whats-new summary { cursor: pointer; color: var(--ink); font-weight: 600; }
-  .whats-new .notes { margin-top: 10px; color: var(--muted); line-height: 1.55; }
-  .whats-new .notes ul { margin: 0; padding-left: 1.2em; }
-  .whats-new .notes li + li { margin-top: 6px; }
-  .whats-new .notes strong { color: var(--ink); font-weight: 600; }
-
   footer { padding: 40px 0 56px; border-top: 1px solid var(--rule); font-size: 15px; color: var(--muted); }
   footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; }
   footer nav { display: flex; gap: 22px; }
@@ -591,11 +583,6 @@
           <li data-release-line>MDown 1.1.1 · 4 MB · macOS 26+</li>
           <li>Apple silicon and Intel. Automatic updates.</li>
         </ul>
-        <details class="whats-new" data-whats-new hidden>
-          <summary>What’s new in MDown <span data-version>1.1.1</span></summary>
-          <div class="notes" data-notes></div>
-        </details>
-
         <div class="source-steps">
           <h3>Or use Homebrew</h3>
           <div class="terminal"><pre><span class="prompt" aria-hidden="true">$ </span><code>brew trust sandeepgangarapu/tap &amp;&amp; brew install --cask sandeepgangarapu/tap/mdown</code></pre><button class="copy" type="button" data-copy>Copy</button></div>
@@ -657,7 +644,7 @@
 </footer>
 
 <script>
-// Version, size, and release notes come from the same feed MDown's updater reads.
+// Version and size come from the same feed MDown's updater reads.
 (async () => {
   try {
     const response = await fetch("appcast.xml", { cache: "no-cache" });
@@ -668,18 +655,11 @@
     const ns = "http://www.andymatuschak.org/xml-namespaces/sparkle";
     const version = item.getElementsByTagNameNS(ns, "shortVersionString")[0]?.textContent?.trim();
     const bytes = Number(item.querySelector("enclosure")?.getAttribute("length") || 0);
-    const notes = item.querySelector("description")?.textContent?.trim();
     if (version && bytes) {
       const mb = Math.max(1, Math.round(bytes / 1e6));
       document.querySelectorAll("[data-release-line]").forEach((node) => {
         node.textContent = `MDown ${version} · ${mb} MB · macOS 26+`;
       });
-    }
-    const whatsNew = document.querySelector("[data-whats-new]");
-    if (whatsNew && version && notes) {
-      whatsNew.querySelector("[data-version]").textContent = version;
-      whatsNew.querySelector("[data-notes]").innerHTML = notes;
-      whatsNew.hidden = false;
     }
   } catch {}
 })();
