@@ -1,0 +1,443 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F00000000000000000000002 /* MDownApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000001 /* MDownApp.swift */; };
+		F00000000000000000000004 /* MarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* MarkdownDocument.swift */; };
+		F00000000000000000000006 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000005 /* EditorView.swift */; };
+		F0000000000000000000002E /* Sidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000002D /* Sidebar.swift */; };
+		F0000000000000000000000A /* InlineContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000009 /* InlineContent.swift */; };
+		F0000000000000000000000C /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000B /* PageView.swift */; };
+		F0000000000000000000002C /* InlineBlockEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000002B /* InlineBlockEditor.swift */; };
+		F0000000000000000000000E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000D /* SettingsView.swift */; };
+		F00000000000000000000010 /* MDownPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000F /* MDownPalette.swift */; };
+		F0000000000000000000001B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000001A /* Assets.xcassets */; };
+		F0000000000000000000002A /* MDownCore in Frameworks */ = {isa = PBXBuildFile; productRef = F00000000000000000000029 /* MDownCore */; };
+		F00000000000000000000041 /* MDownCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000040 /* MDownCommands.swift */; };
+		F00000000000000000000043 /* OpenDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000042 /* OpenDocuments.swift */; };
+		F00000000000000000000045 /* FormatToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000044 /* FormatToolbar.swift */; };
+		F0000000000000000000004B /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000004A /* Typography.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F00000000000000000000019 /* MDown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MDown.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0000000000000000000001A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F0000000000000000000001C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F00000000000000000000001 /* MDownApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDownApp.swift; sourceTree = "<group>"; };
+		F00000000000000000000003 /* MarkdownDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocument.swift; sourceTree = "<group>"; };
+		F00000000000000000000005 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
+		F0000000000000000000002D /* Sidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
+		F00000000000000000000009 /* InlineContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineContent.swift; sourceTree = "<group>"; };
+		F0000000000000000000000B /* PageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageView.swift; sourceTree = "<group>"; };
+		F0000000000000000000002B /* InlineBlockEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineBlockEditor.swift; sourceTree = "<group>"; };
+		F0000000000000000000000D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000F /* MDownPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDownPalette.swift; sourceTree = "<group>"; };
+		F00000000000000000000040 /* MDownCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDownCommands.swift; sourceTree = "<group>"; };
+		F00000000000000000000042 /* OpenDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenDocuments.swift; sourceTree = "<group>"; };
+		F00000000000000000000044 /* FormatToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatToolbar.swift; sourceTree = "<group>"; };
+		F0000000000000000000004A /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F0000000000000000000001E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0000000000000000000002A /* MDownCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F00000000000000000000011 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000042 /* OpenDocuments.swift */,
+				F00000000000000000000040 /* MDownCommands.swift */,
+				F00000000000000000000001 /* MDownApp.swift */,
+				F00000000000000000000003 /* MarkdownDocument.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		F00000000000000000000012 /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000044 /* FormatToolbar.swift */,
+				F0000000000000000000002D /* Sidebar.swift */,
+				F00000000000000000000005 /* EditorView.swift */,
+			);
+			path = Editor;
+			sourceTree = "<group>";
+		};
+		F00000000000000000000013 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000009 /* InlineContent.swift */,
+				F0000000000000000000002B /* InlineBlockEditor.swift */,
+				F0000000000000000000000B /* PageView.swift */,
+			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		F00000000000000000000014 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F0000000000000000000000D /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		F00000000000000000000015 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				F0000000000000000000004A /* Typography.swift */,
+				F0000000000000000000000F /* MDownPalette.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		F00000000000000000000016 /* MDown */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000011 /* App */,
+				F00000000000000000000012 /* Editor */,
+				F00000000000000000000013 /* Preview */,
+				F00000000000000000000014 /* Settings */,
+				F00000000000000000000015 /* Theme */,
+				F0000000000000000000001A /* Assets.xcassets */,
+				F0000000000000000000001C /* Info.plist */,
+			);
+			path = MDown;
+			sourceTree = "<group>";
+		};
+		F00000000000000000000018 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000019 /* MDown.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F00000000000000000000017 = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000016 /* MDown */,
+				F00000000000000000000018 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F00000000000000000000020 /* MDown */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F00000000000000000000023 /* Build configuration list for PBXNativeTarget "MDown" */;
+			buildPhases = (
+				F0000000000000000000001D /* Sources */,
+				F0000000000000000000001E /* Frameworks */,
+				F0000000000000000000001F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MDown;
+			packageProductDependencies = (
+				F00000000000000000000029 /* MDownCore */,
+			);
+			productName = MDown;
+			productReference = F00000000000000000000019 /* MDown.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F00000000000000000000021 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					F00000000000000000000020 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = F00000000000000000000022 /* Build configuration list for PBXProject "MDown" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F00000000000000000000017;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F00000000000000000000028 /* XCLocalSwiftPackageReference "MDownCore" */,
+			);
+			preferredProjectObjectVersion = 63;
+			productRefGroup = F00000000000000000000018 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F00000000000000000000020 /* MDown */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F0000000000000000000001F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0000000000000000000001B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F0000000000000000000001D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0000000000000000000004B /* Typography.swift in Sources */,
+				F00000000000000000000045 /* FormatToolbar.swift in Sources */,
+				F00000000000000000000043 /* OpenDocuments.swift in Sources */,
+				F00000000000000000000041 /* MDownCommands.swift in Sources */,
+				F00000000000000000000002 /* MDownApp.swift in Sources */,
+				F00000000000000000000004 /* MarkdownDocument.swift in Sources */,
+				F0000000000000000000002E /* Sidebar.swift in Sources */,
+				F00000000000000000000006 /* EditorView.swift in Sources */,
+				F0000000000000000000000A /* InlineContent.swift in Sources */,
+				F0000000000000000000002C /* InlineBlockEditor.swift in Sources */,
+				F0000000000000000000000C /* PageView.swift in Sources */,
+				F0000000000000000000000E /* SettingsView.swift in Sources */,
+				F00000000000000000000010 /* MDownPalette.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F00000000000000000000024 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_VERSION = 5.0;
+
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F00000000000000000000025 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_VERSION = 5.0;
+
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		F00000000000000000000026 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MDown/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.mdown.macos;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+
+			};
+			name = Debug;
+		};
+		F00000000000000000000027 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MDown/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.mdown.macos;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F00000000000000000000022 /* Build configuration list for PBXProject "MDown" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F00000000000000000000024 /* Debug */,
+				F00000000000000000000025 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F00000000000000000000023 /* Build configuration list for PBXNativeTarget "MDown" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F00000000000000000000026 /* Debug */,
+				F00000000000000000000027 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		F00000000000000000000028 /* XCLocalSwiftPackageReference "MDownCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = MDownCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F00000000000000000000029 /* MDownCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F00000000000000000000028 /* XCLocalSwiftPackageReference "MDownCore" */;
+			productName = MDownCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+	};
+	rootObject = F00000000000000000000021 /* Project object */;
+}

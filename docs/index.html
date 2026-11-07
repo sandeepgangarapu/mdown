@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MDown, the Markdown editor for working with AI</title>
+<meta name="description" content="MDown is a free, open-source, native Swift Markdown editor for the Mac. Read prompts, agent briefs, and model output typeset, and edit any line's Markdown in place.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="MDown, the Markdown editor for working with AI">
+<meta property="og:description" content="Free, open source, native Swift. The page stays readable and the Markdown is one click away.">
+<meta property="og:image" content="https://mdown.sandeepgangarapu.com/assets/og.png">
+<meta property="og:url" content="https://mdown.sandeepgangarapu.com/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+<style>
+  :root {
+    --page: #ffffff;
+    --canvas: #f5f5f7;
+    --ink: #1d1d1f;
+    --muted: #6e6e73;
+    --syntax: #aeaeb2;
+    --rule: #d2d2d7;
+    --fill: rgba(0, 0, 0, 0.045);
+    --accent: #c46239;
+    --accent-hover: #ad532f;
+    --on-accent: #ffffff;
+    --check: #c46239;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --measure: 64ch;
+    --gutter: clamp(20px, 5vw, 64px);
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #1c1c1e;
+      --canvas: #242426;
+      --ink: #f5f5f7;
+      --muted: #a1a1a6;
+      --syntax: #636366;
+      --rule: #3a3a3c;
+      --fill: rgba(255, 255, 255, 0.06);
+      --accent: #e0835a;
+      --accent-hover: #ec9670;
+      --on-accent: #1c1c1e;
+      --check: #e8946b;
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font: 400 18px/1.55 var(--sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; height: auto; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+  .wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 var(--gutter); }
+
+  /* Header */
+  .site-header { padding: 22px 0; }
+  .site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 650; font-size: 19px; letter-spacing: -0.01em; text-decoration: none; }
+  .brand img { width: 32px; height: 32px; }
+  .site-nav { display: flex; align-items: center; gap: 22px; font-size: 15px; }
+  .site-nav a { text-decoration: none; color: var(--muted); }
+  .site-nav a:hover { color: var(--ink); }
+
+  /* Headings carry their Markdown level in the margin, the way MDown shows source. */
+  .md-heading { position: relative; }
+  .md-mark {
+    font-family: var(--mono);
+    font-weight: 400;
+    color: var(--syntax);
+    letter-spacing: 0;
+    user-select: none;
+  }
+  @media (min-width: 900px) {
+    .md-heading .md-mark { position: absolute; right: calc(100% + 0.32em); top: 0.06em; font-size: 0.62em; line-height: 1.6; }
+  }
+  @media (max-width: 899px) {
+    .md-heading .md-mark { display: block; font-size: 15px; line-height: 1; margin-bottom: 14px; }
+  }
+
+  /* Hero */
+  .hero { padding: clamp(48px, 9vw, 120px) 0 0; }
+  h1 {
+    margin: 0;
+    max-width: 13ch;
+    font-size: clamp(46px, 7.4vw, 92px);
+    line-height: 1.0;
+    font-weight: 700;
+    letter-spacing: -0.038em;
+  }
+  .lede {
+    margin: 30px 0 0;
+    max-width: 36em;
+    font-size: clamp(19px, 1.9vw, 23px);
+    line-height: 1.45;
+    color: var(--muted);
+    letter-spacing: -0.005em;
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-top: 38px; }
+  .button {
+    display: inline-flex; align-items: center; gap: 10px;
+    min-height: 50px; padding: 0 26px;
+    border-radius: 999px;
+    font: 600 17px/1 var(--sans);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .button svg { width: 18px; height: 18px; flex: none; }
+  .button-primary { background: var(--accent); color: var(--on-accent); }
+  .button-primary:hover { background: var(--accent-hover); }
+  .button-quiet { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--rule); }
+  .button-quiet:hover { box-shadow: inset 0 0 0 1.5px var(--muted); }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 26px; margin: 26px 0 0; padding: 0; list-style: none; font-size: 15px; color: var(--muted); }
+  .facts li { display: inline-flex; align-items: center; gap: 8px; }
+  .facts svg { width: 16px; height: 16px; color: var(--check); flex: none; }
+
+  .shot { margin: clamp(48px, 7vw, 88px) auto 0; max-width: 1240px; padding: 0 clamp(8px, 3vw, 40px); }
+  .shot img { width: 100%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .shot img { animation: rise 1.1s cubic-bezier(.2, .7, .2, 1) 0.15s both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(28px) scale(0.985); } to { opacity: 1; transform: none; } }
+  }
+
+  /* Sections */
+  section { padding: clamp(72px, 10vw, 136px) 0; }
+  h2 {
+    margin: 0;
+    max-width: 18ch;
+    font-size: clamp(34px, 4.6vw, 56px);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+  .section-intro { margin: 22px 0 0; max-width: var(--measure); font-size: 20px; line-height: 1.5; color: var(--muted); }
+
+  .problem { background: var(--canvas); }
+  .problem .columns { display: grid; gap: 28px 64px; margin-top: 40px; max-width: 980px; }
+  @media (min-width: 820px) { .problem .columns { grid-template-columns: 1fr 1fr; } }
+  .problem p { margin: 0; font-size: 20px; line-height: 1.55; }
+  .problem p + p { color: var(--muted); }
+  .problem .columns p:last-child { color: var(--ink); }
+
+  /* Live demo */
+  .demo-layout { display: grid; gap: 40px 72px; align-items: start; }
+  @media (min-width: 980px) { .demo-layout { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); } }
+  .demo-hint { margin: 22px 0 0; font-size: 17px; color: var(--muted); max-width: 30em; }
+  kbd {
+    font: 500 14px/1 var(--sans);
+    padding: 3px 7px 4px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px var(--rule), 0 1px 0 var(--rule);
+    color: var(--ink);
+  }
+  .demo-page {
+    background: var(--page);
+    border-radius: 18px;
+    box-shadow: 0 0 0 1px var(--rule), 0 24px 60px -24px rgba(0, 0, 0, 0.28);
+    padding: clamp(28px, 4vw, 48px) clamp(24px, 4vw, 52px);
+    font-size: 18px;
+  }
+  .block {
+    position: relative;
+    margin: 0 -12px;
+    padding: 6px 12px;
+    border-radius: 9px;
+    cursor: text;
+  }
+  .block + .block { margin-top: 10px; }
+  .block:focus-visible { outline-offset: 0; }
+  .block h3 { margin: 0; font-size: 30px; line-height: 1.15; letter-spacing: -0.022em; font-weight: 700; }
+  .block p { margin: 0; line-height: 1.55; }
+  .block ul { margin: 0; padding: 0; list-style: none; }
+  .block li { display: flex; gap: 11px; align-items: baseline; line-height: 1.55; }
+  .block li + li { margin-top: 4px; }
+  .block .bullet { color: var(--muted); width: 1em; text-align: center; flex: none; }
+  .block .box {
+    flex: none; width: 19px; height: 19px; border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px var(--syntax);
+    transform: translateY(3px);
+    display: inline-grid; place-items: center;
+  }
+  .block .box.done { background: var(--check); box-shadow: none; }
+  .block .box.done::after { content: ""; width: 9px; height: 5px; border: solid var(--page); border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg); }
+  .block li.done { color: var(--muted); }
+  .block blockquote { margin: 0; padding-left: 16px; box-shadow: inset 3px 0 0 var(--syntax); color: var(--muted); }
+  .block code { font: 0.86em var(--mono); background: var(--fill); padding: 2px 5px; border-radius: 5px; }
+  .block strong { font-weight: 650; }
+
+  .block.editing { background: var(--fill); cursor: text; }
+  .editor { position: relative; }
+  .editor .mirror,
+  .editor textarea {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    tab-size: 4;
+  }
+  .editor .mirror { color: var(--ink); min-height: 1.55em; }
+  .editor textarea {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    resize: none; overflow: hidden;
+    background: transparent;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    caret-color: var(--accent);
+    outline: none;
+  }
+  .editor textarea::selection { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+  .editor.heading { font-size: 30px; font-weight: 700; letter-spacing: -0.022em; }
+  .editor.heading .mirror, .editor.heading textarea { line-height: 1.15; }
+  .mirror .mk { color: var(--syntax); }
+
+  /* Features */
+  .features { background: var(--canvas); }
+  .feature-list { display: grid; gap: 40px 72px; margin: 56px 0 0; }
+  @media (min-width: 760px) { .feature-list { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .feature-list { grid-template-columns: 1fr 1fr 1fr; } }
+  .feature-list dt { font-size: 20px; font-weight: 650; letter-spacing: -0.012em; display: flex; align-items: center; gap: 10px; }
+  .feature-list dt svg { width: 22px; height: 22px; color: var(--accent); flex: none; }
+  .feature-list dd { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.55; max-width: 34em; }
+
+  /* Download */
+  .download .layout { display: grid; gap: 48px 80px; align-items: start; }
+  @media (min-width: 900px) { .download .layout { grid-template-columns: auto minmax(0, 1fr); } }
+  .download .icon { width: clamp(140px, 18vw, 220px); }
+  .download .actions { margin-top: 30px; }
+  .requirements { margin: 26px 0 0; padding: 0; list-style: none; font-size: 16px; color: var(--muted); }
+  .requirements li + li { margin-top: 4px; }
+  .note { margin: 34px 0 0; max-width: var(--measure); font-size: 16px; color: var(--muted); line-height: 1.6; }
+  .note strong { color: var(--ink); font-weight: 600; }
+  .source-steps { margin: 34px 0 0; max-width: 640px; }
+  .source-steps h3 { margin: 0 0 12px; font-size: 18px; font-weight: 650; }
+  pre.terminal {
+    margin: 0;
+    padding: 18px 22px;
+    border-radius: 14px;
+    background: var(--canvas);
+    font: 15px/1.7 var(--mono);
+    overflow-x: auto;
+  }
+  pre.terminal .prompt { color: var(--syntax); user-select: none; }
+
+  footer { padding: 40px 0 56px; border-top: 1px solid var(--rule); font-size: 15px; color: var(--muted); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; }
+  footer nav { display: flex; gap: 22px; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+
+  @media (max-width: 560px) {
+    .site-nav .hide-small { display: none; }
+    .button { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="assets/icon-256.png" alt="" width="32" height="32">MDown</a>
+    <nav class="site-nav" aria-label="Primary">
+      <a class="hide-small" href="#try">Try it</a>
+      <a class="hide-small" href="#download">Download</a>
+      <a href="https://github.com/sandeepgangarapu/mdown">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <h1 class="md-heading"><span class="md-mark" aria-hidden="true">#</span>The Markdown editor for working with AI.</h1>
+      <p class="lede">Prompts, agent briefs, specs, and model output are all Markdown. The editors around it are either bloated or complex. <strong>MDown is a small native Mac app</strong> that keeps the page readable and puts the Markdown one click away.</p>
+      <div class="actions">
+        <a class="button button-primary" href="https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+          Download for Mac
+        </a>
+        <a class="button button-quiet" href="https://github.com/sandeepgangarapu/mdown">View source on GitHub</a>
+      </div>
+      <ul class="facts">
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Free</li>
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Open source, MIT licensed</li>
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Native Swift, made for macOS</li>
+      </ul>
+    </div>
+    <div class="shot">
+      <picture>
+        <source srcset="assets/screenshot-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="assets/screenshot-light.png" width="1800" height="1332" alt="MDown showing an agent brief for a checkout redesign. The Goal paragraph is open for editing and shows its Markdown, with the asterisks and backticks dimmed, while the headings, checklist, and table around it stay typeset. The sidebar lists three open documents and the brief's headings.">
+      </picture>
+    </div>
+  </div>
+
+  <section class="problem" aria-labelledby="problem-title">
+    <div class="wrap">
+      <h2 class="md-heading" id="problem-title"><span class="md-mark" aria-hidden="true">##</span>Everything else is too much.</h2>
+      <div class="columns">
+        <p>Note apps keep your writing in their own database, behind an account, a sync service, and a plugin store. Code editors want extensions and settings before a heading even looks like a heading.</p>
+        <p>Working with AI needs less. You open a .md file, read what the model wrote, fix a line, and hand it back. MDown does exactly that, then gets out of the way.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="try" id="try" aria-labelledby="try-title">
+    <div class="wrap demo-layout">
+      <div>
+        <h2 class="md-heading" id="try-title"><span class="md-mark" aria-hidden="true">##</span>Click a line to see how it’s written.</h2>
+        <p class="section-intro">Every block on an MDown page is real Markdown. Click one and it turns into its source, right where it was. Change it, then click away and it sets again.</p>
+        <p class="demo-hint">Try it on this page. Press <kbd>esc</kbd> or click outside to finish.</p>
+      </div>
+      <div class="demo-page" id="demo" aria-label="Live MDown page"></div>
+    </div>
+  </section>
+
+  <section class="features" aria-labelledby="features-title">
+    <div class="wrap">
+      <h2 class="md-heading" id="features-title"><span class="md-mark" aria-hidden="true">##</span>Small on purpose.</h2>
+      <dl class="feature-list">
+        <div>
+          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Your files stay files</dt>
+          <dd>Plain .md files on disk. No database, no account, no sync service. Git, your terminal, and your AI tools all read the same file you do.</dd>
+        </div>
+        <div>
+          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Native and quick</dt>
+          <dd>Written in Swift with SwiftUI and AppKit. It opens instantly, stays light on memory, and behaves like the rest of your Mac.</dd>
+        </div>
+        <div>
+          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>Edit in place</dt>
+          <dd>Click any block to edit its Markdown. Return starts a new paragraph or list item, Tab nests a list, and the arrow keys move between blocks.</dd>
+        </div>
+        <div>
+          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg>Every open file in view</dt>
+          <dd>The sidebar lists your open documents, the current one’s headings, and recent files. Switch with a click, jump to any section.</dd>
+        </div>
+        <div>
+          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M8 14h8"/></svg>Shortcuts you already know</dt>
+          <dd>Title, Heading, Body, and Checklist use the same keys as Notes. Bold is ⌘B, a link is ⌘K, and Find is ⌘F.</dd>
+        </div>
+        <div>
+          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/></svg>Free and open source</dt>
+          <dd>MIT licensed and built in the open. Read the code, change it, and make it yours.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="download" id="download" aria-labelledby="download-title">
+    <div class="wrap layout">
+      <img class="icon" src="assets/icon-512.png" width="512" height="512" alt="MDown app icon">
+      <div>
+        <h2 class="md-heading" id="download-title"><span class="md-mark" aria-hidden="true">##</span>Get MDown</h2>
+        <div class="actions">
+          <a class="button button-primary" href="https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+            Download MDown.dmg
+          </a>
+          <a class="button button-quiet" href="https://github.com/sandeepgangarapu/mdown/releases">All releases</a>
+        </div>
+        <ul class="requirements">
+          <li>Requires macOS 26 or later</li>
+          <li>Runs natively on Apple silicon and Intel</li>
+        </ul>
+        <p class="note"><strong>First launch:</strong> MDown isn’t notarized by Apple yet, so macOS stops it the first time. Open System Settings, go to Privacy &amp; Security, and click Open Anyway next to MDown. You only do this once.</p>
+        <div class="source-steps">
+          <h3>Or build it yourself</h3>
+<pre class="terminal"><span class="prompt">$ </span>git clone https://github.com/sandeepgangarapu/mdown.git
+<span class="prompt">$ </span>open mdown/MDown.xcodeproj</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>MDown is free and open source under the MIT License. Made by <a href="https://sandeepgangarapu.com">Sandeep Gangarapu</a>.</span>
+    <nav aria-label="Footer">
+      <a href="https://github.com/sandeepgangarapu/mdown">GitHub</a>
+      <a href="https://github.com/sandeepgangarapu/mdown/issues">Report an issue</a>
+      <a href="https://github.com/sandeepgangarapu/mdown/blob/main/LICENSE">License</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const blocks = [
+    "# Weekly summary prompt",
+    "Summarize the week’s merged pull requests for the team channel. Keep it under **150 words** and mention the `release` branch.",
+    "- [x] Group changes by area\n- [ ] Link each pull request\n- [ ] Call out anything *risky*",
+    "> Write for people who missed standup, not for the authors."
+  ];
+  const page = document.getElementById("demo");
+  let open = -1;
+
+  const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const inline = (text) => escape(text)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>")
+    .replace(/~~([^~]+)~~/g, "<s>$1</s>")
+    .replace(/\[([^\]]+)\]\(([^)]*)\)/g, '<span style="color:var(--accent)">$1</span>');
+
+  const render = (md) => {
+    const out = [];
+    let paragraph = [];
+    let list = [];
+    let quote = [];
+    const flush = () => {
+      if (paragraph.length) { out.push(`<p>${inline(paragraph.join(" "))}</p>`); paragraph = []; }
+      if (list.length) { out.push(`<ul>${list.join("")}</ul>`); list = []; }
+      if (quote.length) { out.push(`<blockquote><p>${inline(quote.join(" "))}</p></blockquote>`); quote = []; }
+    };
+    for (const line of md.split("\n")) {
+      let m;
+      if (!line.trim()) { flush(); continue; }
+      if ((m = line.match(/^#{1,6}\s+(.*)$/))) { flush(); out.push(`<h3>${inline(m[1])}</h3>`); continue; }
+      if ((m = line.match(/^>\s?(.*)$/))) { if (paragraph.length || list.length) flush(); quote.push(m[1]); continue; }
+      if ((m = line.match(/^\s*[-*+]\s+\[([ xX])\]\s+(.*)$/))) {
+        if (paragraph.length || quote.length) flush();
+        const done = m[1] !== " ";
+        list.push(`<li class="${done ? "done" : ""}"><span class="box${done ? " done" : ""}" aria-hidden="true"></span><span>${inline(m[2])}</span></li>`);
+        continue;
+      }
+      if ((m = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(.*)$/))) {
+        if (paragraph.length || quote.length) flush();
+        list.push(`<li><span class="bullet" aria-hidden="true">•</span><span>${inline(m[1])}</span></li>`);
+        continue;
+      }
+      if (list.length || quote.length) flush();
+      paragraph.push(line.trim());
+    }
+    flush();
+    return out.join("");
+  };
+
+  // The source view: the same text, with the Markdown syntax dimmed.
+  const highlight = (md) => {
+    const lines = md.split("\n").map((line) => {
+      let html = escape(line);
+      const lead = html.match(/^(\s*(?:#{1,6}\s+|&gt;\s?|[-*+]\s+\[[ xX]\]\s+|[-*+]\s+|\d+[.)]\s+))/);
+      let prefix = "";
+      if (lead) { prefix = `<span class="mk">${lead[1]}</span>`; html = html.slice(lead[1].length); }
+      html = html
+        .replace(/`([^`]*)`/g, '<span class="mk">`</span>$1<span class="mk">`</span>')
+        .replace(/\[([^\]]*)\]\(([^)]*)\)/g, '<span class="mk">[</span>$1<span class="mk">]($2)</span>')
+        .replace(/(\*\*|~~)/g, '<span class="mk">$1</span>')
+        .replace(/(^|[^*>])\*(?!\*)/g, '$1<span class="mk">*</span>');
+      return prefix + html;
+    });
+    let html = lines.join("\n");
+    if (md.endsWith("\n") || md === "") html += " ";
+    return html;
+  };
+
+  const draw = () => {
+    page.replaceChildren();
+    blocks.forEach((md, index) => {
+      const block = document.createElement("div");
+      block.className = "block";
+      if (index === open) {
+        block.classList.add("editing");
+        const editor = document.createElement("div");
+        editor.className = "editor" + (/^#{1,6}\s/.test(md) ? " heading" : "");
+        const mirror = document.createElement("div");
+        mirror.className = "mirror";
+        mirror.setAttribute("aria-hidden", "true");
+        mirror.innerHTML = highlight(md);
+        const field = document.createElement("textarea");
+        field.value = md;
+        field.spellcheck = false;
+        field.setAttribute("aria-label", "Markdown source for this block");
+        field.addEventListener("input", () => {
+          blocks[index] = field.value;
+          mirror.innerHTML = highlight(field.value);
+          editor.className = "editor" + (/^#{1,6}\s/.test(field.value) ? " heading" : "");
+        });
+        field.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") { event.preventDefault(); finish(index); }
+        });
+        editor.append(mirror, field);
+        block.append(editor);
+        page.append(block);
+        requestAnimationFrame(() => {
+          field.focus();
+          field.setSelectionRange(field.value.length, field.value.length);
+        });
+      } else {
+        block.innerHTML = render(md);
+        block.tabIndex = 0;
+        block.setAttribute("role", "button");
+        block.setAttribute("aria-label", "Edit this block: " + block.textContent.trim());
+        block.addEventListener("click", () => edit(index));
+        block.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") { event.preventDefault(); edit(index); }
+        });
+        page.append(block);
+      }
+    });
+  };
+
+  const tidy = () => {
+    for (let i = blocks.length - 1; i >= 0; i--) if (!blocks[i].trim()) blocks.splice(i, 1);
+    if (!blocks.length) blocks.push("Start writing");
+  };
+
+  const edit = (index) => {
+    if (open === index) return;
+    const target = blocks[index];
+    open = -1;
+    tidy();
+    open = blocks.indexOf(target);
+    draw();
+  };
+
+  const finish = (index) => {
+    const text = blocks[index];
+    open = -1;
+    tidy();
+    draw();
+    const position = blocks.indexOf(text);
+    if (position >= 0) page.children[position]?.focus();
+  };
+
+  document.addEventListener("pointerdown", (event) => {
+    if (open >= 0 && !event.target.closest(".block.editing")) {
+      const inside = event.target.closest("#demo .block");
+      if (!inside) { open = -1; tidy(); draw(); }
+    }
+  });
+
+  draw();
+})();
+</script>
+</body>
+</html>
