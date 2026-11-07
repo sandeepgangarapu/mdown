@@ -1,19 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-page="paper">
 <head>
 <meta charset="utf-8">
 <script>
   if (location.protocol === "http:" && /sandeepgangarapu\.com$/.test(location.hostname)) {
     location.replace("https://" + location.host + location.pathname + location.search + location.hash);
   }
-  // iPadOS reports itself as a Mac, so touch screens count as "not a Mac".
-  document.documentElement.classList.add(/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints < 2 ? "is-mac" : "not-mac");
+  (function () {
+    var root = document.documentElement;
+    // iPadOS reports itself as a Mac, so touch screens count as "not a Mac".
+    root.classList.add("js", /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints < 2 ? "is-mac" : "not-mac");
+    // Page settings are applied before first paint so the page never flashes the default look.
+    try {
+      var s = JSON.parse(localStorage.getItem("mdown.web.settings") || "{}");
+      if (s.face) root.setAttribute("data-face", s.face);
+      if (s.theme) root.setAttribute("data-page", s.theme);
+      if (s.size) root.style.setProperty("--text-size", s.size + "px");
+      if (s.sidebar === false) root.classList.add("sidebar-hidden");
+    } catch (e) {}
+  })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MDown — Read Markdown. Edit when you need to.</title>
 <meta name="description" content="We read Markdown more than we edit it. MDown opens it instantly as a clean page. Free, open source, and native to Mac. No accounts, sync, or vaults.">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fcf9f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1a16" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="MDown — Read Markdown. Edit when you need to.">
 <meta property="og:description" content="Opens instantly as a clean page. Free, open source, and native to Mac. No accounts, sync, or vaults.">
 <meta property="og:url" content="https://mdown.sandeepgangarapu.com/">
@@ -56,592 +67,2443 @@
 </script>
 <style>
   :root {
+    --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
+    --sans: var(--ui);
+    --serif: ui-serif, "New York", "Iowan Old Style", Charter, Georgia, serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --face: var(--sans);
+    --text-size: 18px;
+    --sidebar-w: 256px;
+    --bar-h: 60px;
+
     --page: #ffffff;
-    --canvas: #f5f5f7;
+    --window: #f2f2f4;
     --ink: #1d1d1f;
-    --muted: #6e6e73;
-    --syntax: #aeaeb2;
-    --rule: #d2d2d7;
+    --secondary: #6e6e73;
+    --tertiary: #aeaeb4;
+    --rule: #e3e3e8;
     --fill: rgba(0, 0, 0, 0.045);
+    --hover: rgba(0, 0, 0, 0.022);
+    --code-bg: rgba(0, 0, 0, 0.05);
+    --row: rgba(0, 0, 0, 0.075);
+    --glass: rgba(255, 255, 255, 0.88);
+    --glass-edge: rgba(0, 0, 0, 0.09);
+    --menu: #ffffff;
     --accent: #c46239;
     --accent-hover: #ad532f;
     --on-accent: #ffffff;
-    --check: #c46239;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
-    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-    --measure: 64ch;
-    --gutter: clamp(20px, 5vw, 64px);
+    --accent-soft: rgba(196, 98, 57, 0.13);
+    --link: #b8552f;
+    --tk-k: #c2255c;
+    --tk-s: #c4372c;
+    --tk-n: #8a3fbf;
+    --tk-t: #17809a;
+    --tk-c: #8e8e93;
+    --find: rgba(255, 204, 0, 0.4);
+    --find-current: rgba(255, 149, 0, 0.6);
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --page: #1c1c1e;
-      --canvas: #242426;
-      --ink: #f5f5f7;
-      --muted: #a1a1a6;
-      --syntax: #636366;
-      --rule: #3a3a3c;
-      --fill: rgba(255, 255, 255, 0.06);
+      --page: #1e1e20;
+      --window: #28282a;
+      --ink: #f2f2f4;
+      --secondary: #a1a1a6;
+      --tertiary: #636368;
+      --rule: #3a3a3d;
+      --fill: rgba(255, 255, 255, 0.065);
+      --hover: rgba(255, 255, 255, 0.03);
+      --code-bg: rgba(255, 255, 255, 0.075);
+      --row: rgba(255, 255, 255, 0.09);
+      --glass: rgba(52, 52, 55, 0.84);
+      --glass-edge: rgba(255, 255, 255, 0.09);
+      --menu: #2c2c2e;
       --accent: #e0835a;
       --accent-hover: #ec9670;
       --on-accent: #1c1c1e;
-      --check: #e8946b;
+      --accent-soft: rgba(224, 131, 90, 0.2);
+      --link: #ec9670;
+      --tk-k: #ff6b93;
+      --tk-s: #ff7b6b;
+      --tk-n: #c792ea;
+      --tk-t: #5fc9de;
+      --tk-c: #8e8e93;
+      --find: rgba(255, 214, 10, 0.3);
+      --find-current: rgba(255, 159, 10, 0.6);
     }
   }
+  /* Paper: the warm, book-like page, and MDown's default. "Plain" is the tokens above. */
+  :root[data-page="paper"] {
+    --page: #fcf9f3;
+    --window: #f1ebe1;
+    --ink: #1e1a16;
+    --secondary: #6e655c;
+    --tertiary: rgba(110, 101, 92, 0.55);
+    --rule: #ddd4c6;
+    --fill: rgba(196, 98, 57, 0.08);
+    --hover: rgba(196, 98, 57, 0.04);
+    --code-bg: #efe8dc;
+    --row: rgba(110, 80, 50, 0.1);
+    --glass: rgba(253, 250, 245, 0.88);
+    --glass-edge: rgba(80, 60, 40, 0.12);
+    --menu: #fdfaf5;
+    --accent: #c46239;
+    --accent-hover: #ad532f;
+    --on-accent: #ffffff;
+    --link: #b0522e;
+    --tk-k: #b03e55;
+    --tk-s: #2f6a45;
+    --tk-n: #a15c2e;
+    --tk-t: #3e5678;
+    --tk-c: #8a8176;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-page="paper"] {
+      --page: #1c1a16;
+      --window: #24211c;
+      --ink: #f0e8da;
+      --secondary: #b1a79a;
+      --tertiary: rgba(177, 167, 154, 0.5);
+      --rule: #3a342c;
+      --fill: rgba(232, 148, 107, 0.1);
+      --hover: rgba(232, 148, 107, 0.05);
+      --code-bg: #26231e;
+      --row: rgba(240, 232, 218, 0.08);
+      --glass: rgba(40, 37, 32, 0.86);
+      --glass-edge: rgba(240, 232, 218, 0.1);
+      --menu: #2a2620;
+      --accent: #e8946b;
+      --accent-hover: #efa27d;
+      --on-accent: #1c1a16;
+      --link: #efa27d;
+      --tk-k: #ef90a2;
+      --tk-s: #b7d4c0;
+      --tk-n: #e2b48a;
+      --tk-t: #c5d0e4;
+      --tk-c: #8c8378;
+    }
+  }
+  :root[data-face="serif"] { --face: var(--serif); }
+  :root[data-face="mono"] { --face: var(--mono); }
 
   *, *::before, *::after { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--bar-h) + 16px); }
   body {
     margin: 0;
     background: var(--page);
     color: var(--ink);
-    font: 400 18px/1.55 var(--sans);
+    font: 400 15px/1.4 var(--ui);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  a { color: inherit; }
-  img { display: block; max-width: 100%; height: auto; }
-  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+  .not-mac .mac-only, .is-mac .other-only { display: none !important; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  .wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 var(--gutter); }
+  /* Without JavaScript the page is the plain Markdown files, which read fine on their own. */
+  html:not(.js) .app, html:not(.js) .popover, html:not(.js) .drop, html:not(.js) .toast { display: none; }
+  .js .sources { display: none; }
+  .sources { max-width: 46em; margin: 0 auto; padding: 40px 20px 80px; }
+  .md-source { margin: 0 0 56px; font: 15px/1.65 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 
-  /* Header */
-  .site-header { padding: 22px 0; }
-  .site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 650; font-size: 19px; letter-spacing: -0.01em; text-decoration: none; }
-  .brand img { width: 32px; height: 32px; }
-  .site-nav { display: flex; align-items: center; gap: 22px; font-size: 15px; }
-  .site-nav a { text-decoration: none; color: var(--muted); }
-  .site-nav a:hover { color: var(--ink); }
+  /* Window: sidebar, toolbar, page. */
+  .sidebar {
+    position: fixed; z-index: 30; top: 0; bottom: 0; left: 0;
+    width: var(--sidebar-w);
+    display: flex; flex-direction: column;
+    background: var(--window);
+    border-right: 1px solid var(--rule);
+    font: 14px/1.3 var(--ui);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s;
+  }
+  .main { margin-left: var(--sidebar-w); min-height: 100vh; min-height: 100dvh; transition: margin-left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .sidebar-hidden .sidebar { transform: translateX(-100%); }
+  .sidebar-hidden .main { margin-left: 0; }
+  .scrim { display: none; }
 
-  /* Headings carry their Markdown level in the margin, the way MDown shows source. */
-  .md-heading { position: relative; }
-  .md-mark {
-    font-family: var(--mono);
-    font-weight: 400;
-    color: var(--syntax);
-    letter-spacing: 0;
-    user-select: none;
+  .lights { display: inline-flex; gap: 8px; flex: none; }
+  .lights i { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.14); }
+  .lights i:nth-child(2) { background: #febc2e; }
+  .lights i:nth-child(3) { background: #28c840; }
+
+  .sb-head { height: var(--bar-h); flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 20px; }
+  .sb-scroll { flex: 1; overflow-y: auto; padding-bottom: 12px; }
+  .sb-label { margin: 16px 20px 6px; font-size: 12px; font-weight: 600; color: var(--secondary); letter-spacing: 0.01em; }
+  .sb-scroll ul { list-style: none; margin: 0; padding: 0 8px; }
+  .doc-list li { position: relative; }
+  .doc-item {
+    display: flex; align-items: center; gap: 9px;
+    width: 100%; padding: 7px 10px; border: 0; border-radius: 9px;
+    background: none; text-align: left; cursor: pointer;
   }
-  @media (min-width: 900px) {
-    .md-heading .md-mark { position: absolute; right: calc(100% + 0.32em); top: 0.06em; font-size: 0.62em; line-height: 1.6; }
+  .doc-item:hover { background: var(--hover); }
+  .doc-item[aria-current="page"] { background: var(--row); font-weight: 600; }
+  .doc-item svg { width: 16px; height: 20px; flex: none; color: var(--accent); }
+  .doc-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .doc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--secondary); flex: none; }
+  .doc-close {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 22px; height: 22px; border: 0; border-radius: 6px; background: none;
+    color: var(--secondary); font-size: 16px; line-height: 1; cursor: pointer; opacity: 0;
   }
-  @media (max-width: 899px) {
-    .md-heading .md-mark { display: block; font-size: 15px; line-height: 1; margin-bottom: 14px; }
+  .doc-list li:hover .doc-close, .doc-close:focus-visible { opacity: 1; }
+  .doc-close:hover { background: var(--fill); color: var(--ink); }
+  @media (hover: none) { .doc-close { opacity: 1; } }
+  .ol-item {
+    display: block; width: 100%;
+    padding: 6px 10px 6px calc(10px + var(--lvl, 0) * 14px);
+    border: 0; border-radius: 8px; background: none;
+    color: var(--secondary); text-align: left; cursor: pointer;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .ol-item:hover { color: var(--ink); background: var(--hover); }
+  .ol-item.current { color: var(--ink); font-weight: 600; }
+  .ol-empty { padding: 6px 10px; color: var(--tertiary); }
+  .sb-foot { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 12px 14px; }
+  .sb-new, .sb-open {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border: 0; border-radius: 8px; background: none;
+    color: var(--secondary); cursor: pointer;
+  }
+  .sb-new:hover, .sb-open:hover { color: var(--ink); background: var(--hover); }
+  .sb-new svg, .sb-open svg { width: 16px; height: 16px; }
+
+  .toolbar {
+    position: sticky; top: 0; z-index: 20;
+    height: var(--bar-h);
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px 0 24px;
+    background: color-mix(in srgb, var(--page) 84%, transparent);
+    -webkit-backdrop-filter: saturate(1.6) blur(18px);
+    backdrop-filter: saturate(1.6) blur(18px);
+  }
+  .toolbar .tb-lights, .toolbar .tb-sidebar { display: none; }
+  .sidebar-hidden .toolbar .tb-lights { display: inline-flex; margin-right: 8px; }
+  .sidebar-hidden .toolbar .tb-sidebar { display: grid; }
+  .title { flex: 1 1 auto; min-width: 0; margin-right: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .title-edited { color: var(--secondary); font-weight: 400; }
+  .group {
+    display: flex; align-items: center; gap: 1px; flex: none;
+    padding: 3px; border-radius: 999px;
+    background: var(--glass);
+    box-shadow: 0 0 0 0.5px var(--glass-edge), 0 2px 10px -3px rgba(0, 0, 0, 0.1);
+  }
+  .tb {
+    width: 34px; height: 34px; padding: 0; border: 0; border-radius: 999px;
+    display: grid; place-items: center;
+    background: transparent; color: var(--ink); cursor: pointer;
+    font: 500 16px/1 var(--ui);
+  }
+  .tb svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .tb:hover:not(:disabled) { background: var(--fill); }
+  .tb[aria-pressed="true"], .tb[aria-expanded="true"] { background: var(--accent-soft); color: var(--accent); }
+  .tb:disabled { color: var(--tertiary); cursor: default; }
+  .toolbar > .tb { flex: none; }
+  .tb .aa { font-size: 17px; letter-spacing: -0.02em; }
+  .tb .gb { font-weight: 700; font-size: 17px; }
+  .tb .gi { font-style: italic; font-family: var(--serif); font-size: 19px; }
+  .tb .gs { text-decoration: line-through; text-decoration-thickness: 1.5px; font-size: 17px; }
+  .formats { display: flex; gap: 8px; flex: none; }
+  .find {
+    flex: none; display: flex; align-items: center; gap: 7px;
+    width: 190px; height: 40px; padding: 0 14px;
+    border-radius: 999px; background: var(--glass);
+    box-shadow: 0 0 0 0.5px var(--glass-edge), 0 2px 10px -3px rgba(0, 0, 0, 0.1);
+    color: var(--secondary); cursor: text;
+    transition: width 0.2s;
+  }
+  .find svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .find input { flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--ink); font: 14px var(--ui); outline: none; }
+  .find input::placeholder { color: var(--secondary); }
+  .find input::-webkit-search-cancel-button { display: none; }
+  .find-count { flex: none; font-size: 12px; color: var(--secondary); font-variant-numeric: tabular-nums; }
+  .get {
+    flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    height: 40px; padding: 0 17px; border: 0; border-radius: 999px;
+    background: var(--accent); color: var(--on-accent);
+    font: 600 14px/1 var(--ui); text-decoration: none; white-space: nowrap; cursor: pointer;
+  }
+  .get:hover { background: var(--accent-hover); }
+  .get svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+  @media (max-width: 1319px) {
+    .find { width: 40px; padding: 0; justify-content: center; }
+    .find input { flex: 0 0 0; width: 0; opacity: 0; }
+    .find-count { display: none; }
+    .finding .find { width: 230px; padding: 0 14px; justify-content: flex-start; }
+    .finding .find input { flex: 1; opacity: 1; }
+    .finding .find-count { display: block; }
+    .finding .formats { display: none; }
+  }
+  /* Narrower windows: the sidebar slides over the page instead of sitting beside it. */
+  @media (max-width: 1079px) {
+    .main, .sidebar-hidden .main { margin-left: 0; }
+    .sidebar, .sidebar-hidden .sidebar { width: min(300px, 86vw); transform: translateX(-100%); }
+    .drawer-open .sidebar { transform: none; box-shadow: 0 0 50px rgba(0, 0, 0, 0.22); }
+    .scrim { display: block; position: fixed; inset: 0; z-index: 25; background: rgba(0, 0, 0, 0.22); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+    .drawer-open .scrim { opacity: 1; pointer-events: auto; }
+    .toolbar .tb-sidebar, .sidebar-hidden .toolbar .tb-sidebar { display: grid; }
+    .lights, .sidebar-hidden .toolbar .tb-lights { display: none; }
+    .toolbar { padding-left: 12px; }
+  }
+  @media (max-width: 859px) {
+    .get.mac-only { width: 40px; padding: 0; }
+    .get.mac-only span { display: none; }
+  }
+  @media (max-width: 699px) {
+    .toolbar { gap: 6px; padding: 0 10px; }
+    .formats { display: none; }
+    .is-editing .formats { display: flex; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+    .is-editing .formats::-webkit-scrollbar { display: none; }
+    .is-editing .title, .is-editing .share-group, .is-editing .get, .is-editing .find { display: none; }
+  }
+  @media (max-width: 599px) {
+    .find { display: none; }
   }
 
-  /* Hero */
-  .hero { padding: clamp(48px, 7vw, 80px) 0 clamp(56px, 7vw, 88px); }
-  h1 {
-    margin: 0;
-    max-width: 22ch;
-    font-size: clamp(38px, 6.6vw, 76px);
-    line-height: 1.0;
-    font-weight: 700;
-    letter-spacing: -0.038em;
-  }
-  .lede {
-    margin: 30px 0 0;
-    max-width: 36em;
-    font-size: clamp(19px, 1.9vw, 23px);
-    line-height: 1.45;
-    color: var(--muted);
-    letter-spacing: -0.005em;
-  }
-  .lede strong { color: var(--ink); font-weight: 600; }
-  .lede em { color: var(--ink); }
-  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-top: 38px; }
-  .button {
-    display: inline-flex; align-items: center; gap: 10px;
-    min-height: 50px; padding: 0 26px;
-    border-radius: 999px;
-    font: 600 17px/1 var(--sans);
-    letter-spacing: -0.01em;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .button svg { width: 18px; height: 18px; flex: none; }
-  .button-primary { background: var(--accent); color: var(--on-accent); }
-  .button-primary:hover { background: var(--accent-hover); }
-  .button-quiet { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--rule); }
-  .button-quiet:hover { box-shadow: inset 0 0 0 1.5px var(--muted); }
-  .facts { display: flex; flex-wrap: wrap; gap: 8px 26px; margin: 26px 0 0; padding: 0; list-style: none; font-size: 15px; color: var(--muted); }
-  .facts li { display: inline-flex; align-items: center; gap: 8px; }
-  .facts svg { width: 16px; height: 16px; color: var(--check); flex: none; }
-
-  .release-meta { margin: 18px 0 0; font-size: 15px; color: var(--muted); }
-  .release-meta a { color: var(--ink); text-underline-offset: 3px; }
-  .other-only { display: none; }
-  .not-mac .mac-only { display: none; }
-  .not-mac .other-only { display: block; }
-  .not-mac .actions.other-only { display: flex; }
-  .other-note { margin: 0; font-size: 17px; color: var(--muted); }
-  .stars { font-weight: 500; color: var(--muted); }
-
-  /* Hero: the page, then the same page with one block opened, on a loop. */
-  .shot { margin: clamp(40px, 6vw, 64px) auto 0; max-width: 1240px; padding: 0 clamp(8px, 3vw, 40px); }
-  .loop {
-    position: relative;
-    filter: drop-shadow(0 30px 50px rgba(0, 0, 0, 0.18)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.10));
-  }
-  .loop picture { display: block; }
-  .loop img { width: 100%; height: auto; }
-  .loop .frame-edit { position: absolute; inset: 0; opacity: 0; }
-  .loop .cursor { position: absolute; width: clamp(14px, 1.6vw, 22px); height: auto; left: 56%; top: 33%; opacity: 0; pointer-events: none; transform-origin: 0 0; }
-  .loop-caption { margin: 22px 0 0; text-align: center; font-size: 15px; color: var(--muted); }
-  .loop-caption a { color: var(--ink); text-underline-offset: 3px; }
-  @media (prefers-reduced-motion: no-preference) {
-    .loop { animation: rise 1.1s cubic-bezier(.2, .7, .2, 1) 0.15s both; }
-    .loop .frame-edit { animation: open-block 8s ease-in-out 1.6s infinite; }
-    .loop .cursor { animation: cursor-path 8s ease-in-out 1.6s infinite; }
-    @keyframes rise { from { opacity: 0; transform: translateY(28px) scale(0.985); } to { opacity: 1; transform: none; } }
-    @keyframes open-block {
-      0%, 33% { opacity: 0; }
-      36%, 74% { opacity: 1; }
-      78%, 100% { opacity: 0; }
-    }
-    @keyframes cursor-path {
-      0% { left: 84%; top: 82%; opacity: 0; transform: scale(1); }
-      6% { opacity: 1; }
-      28% { left: 56%; top: 33%; transform: scale(1); }
-      31% { left: 56%; top: 33%; transform: scale(0.82); }
-      34% { left: 56%; top: 33%; transform: scale(1); }
-      58% { left: 56%; top: 33%; }
-      70% { left: 93%; top: 58%; transform: scale(1); }
-      73% { left: 93%; top: 58%; transform: scale(0.82); }
-      76% { left: 93%; top: 58%; transform: scale(1); }
-      90% { opacity: 1; }
-      100% { left: 93%; top: 58%; opacity: 0; }
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .loop .frame-edit { opacity: 1; }
-  }
-
-  /* Sections */
-  section { padding: clamp(56px, 7vw, 88px) 0; }
-  h2 {
-    margin: 0;
-    max-width: 18ch;
-    font-size: clamp(34px, 4.6vw, 56px);
-    line-height: 1.05;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-  }
-  .section-intro { margin: 22px 0 0; max-width: var(--measure); font-size: 20px; line-height: 1.5; color: var(--muted); }
-
-  .try, .compare { background: var(--canvas); }
-
-  /* Live demo */
-  .demo-layout { display: grid; gap: 40px 72px; align-items: start; }
-  @media (min-width: 980px) { .demo-layout { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); } }
-  .demo-hint { margin: 22px 0 0; font-size: 17px; color: var(--muted); max-width: 30em; }
-  kbd {
-    font: 500 14px/1 var(--sans);
-    padding: 3px 7px 4px;
-    border-radius: 6px;
-    box-shadow: inset 0 0 0 1px var(--rule), 0 1px 0 var(--rule);
-    color: var(--ink);
-  }
-  .demo-page {
-    background: var(--page);
-    border-radius: 18px;
-    box-shadow: 0 0 0 1px var(--rule), 0 24px 60px -24px rgba(0, 0, 0, 0.28);
-    padding: clamp(28px, 4vw, 48px) clamp(24px, 4vw, 52px);
-    font-size: 18px;
+  /* The page. */
+  .page {
+    --gutter: clamp(20px, 5vw, 56px);
+    --h1: clamp(1.85em, 1.15em + 2.2vw, 2.5em);
+    --h2: 1.55em;
+    --h3: 1.22em;
+    display: block;
+    max-width: calc(42em + 2 * var(--gutter));
+    margin: 0 auto;
+    padding: 36px var(--gutter) 18vh;
+    font-family: var(--face);
+    font-size: var(--text-size);
+    line-height: 1.55;
+    overflow-wrap: break-word;
   }
   .block {
     position: relative;
-    margin: 0 -12px;
-    padding: 6px 12px;
-    border-radius: 9px;
+    margin: 0 -14px;
+    padding: 4px 14px;
+    border-radius: 10px;
     cursor: text;
+    transition: background-color 0.15s;
   }
-  .block + .block { margin-top: 10px; }
-  .block:focus-visible { outline-offset: 0; }
-  .block h3 { margin: 0; font-size: 30px; line-height: 1.15; letter-spacing: -0.022em; font-weight: 700; }
-  .block p { margin: 0; line-height: 1.55; }
-  .block ul { margin: 0; padding: 0; list-style: none; }
-  .block li { display: flex; gap: 11px; align-items: baseline; line-height: 1.55; }
-  .block li + li { margin-top: 4px; }
-  .block .bullet { color: var(--muted); width: 1em; text-align: center; flex: none; }
-  /* Centered on the first line of the item, so checking it never moves it. */
-  .block .box {
-    flex: none; width: 19px; height: 19px; border-radius: 50%;
-    box-shadow: inset 0 0 0 1.5px var(--syntax);
-    align-self: flex-start;
-    margin: calc((1.55em - 19px) / 2) 0 0;
-    display: inline-grid; place-items: center;
-    appearance: none; border: 0; padding: 0;
-    font: inherit; line-height: 1;
-    background: transparent; cursor: pointer;
-  }
-  .block .box:hover { box-shadow: inset 0 0 0 1.5px var(--check); }
-  .block .box:focus-visible { outline-offset: 2px; border-radius: 50%; }
-  .block .box.done { background: var(--check); box-shadow: none; }
-  .block .box.done::after { content: ""; width: 9px; height: 5px; border: solid var(--page); border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg); }
-  .block li.done { color: var(--muted); }
-  .block blockquote { margin: 0; padding-left: 16px; box-shadow: inset 3px 0 0 var(--syntax); color: var(--muted); }
-  .block code { font: 0.86em var(--mono); background: var(--fill); padding: 2px 5px; border-radius: 5px; }
-  .block strong { font-weight: 650; }
+  .block + .block { margin-top: 0.6em; }
+  .block.lvl-1 + .block { margin-top: 0.75em; }
+  .block + .block.lvl-2 { margin-top: 1.5em; }
+  .block + .block.lvl-3 { margin-top: 1.15em; }
+  .block.k-heading + .block:not(.k-heading) { margin-top: 0.35em; }
+  .block.lvl-1 + .block:not(.k-heading) { margin-top: 0.7em; }
+  .block + .block.k-image { margin-top: 1.5em; }
+  .block.k-image + .block { margin-top: 1.3em; }
+  @media (hover: hover) { .block:not(.editing):hover { background: var(--hover); } }
+  .block:focus { outline: none; }
+  .block:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+  .block.editing { background: var(--fill); }
 
-  .block.editing { background: var(--fill); cursor: text; }
-  .editor { position: relative; }
-  .editor .mirror,
-  .editor textarea {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font: inherit;
-    letter-spacing: inherit;
-    line-height: 1.55;
+  .page h1, .page h2, .page h3, .page h4, .page h5, .page h6,
+  .page p, .page ul, .page ol, .page blockquote, .page pre, .page table, .page figure, .page hr { margin: 0; }
+  .page h1 { font-size: var(--h1); line-height: 1.08; letter-spacing: -0.028em; font-weight: 700; text-wrap: balance; }
+  .page h2 { font-size: var(--h2); line-height: 1.2; letter-spacing: -0.018em; font-weight: 700; }
+  .page h3 { font-size: var(--h3); line-height: 1.3; letter-spacing: -0.01em; font-weight: 650; }
+  .page h4, .page h5, .page h6 { font-size: 1em; font-weight: 650; }
+  .page strong { font-weight: 650; }
+  .page a { color: var(--link); text-decoration: none; }
+  .page a:hover { text-decoration: underline; text-underline-offset: 0.18em; }
+  .page code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 0.12em 0.36em; border-radius: 5px; }
+  .page ul, .page ol { padding-left: 1.45em; }
+  .page li + li, .page li > ul, .page li > ol, .page .li-body > ul, .page .li-body > ol { margin-top: 0.3em; }
+  .page li::marker { color: var(--secondary); }
+  .page ul.tasks { list-style: none; padding-left: 0; }
+  .page li.task { display: flex; gap: 0.6em; align-items: flex-start; }
+  .page li.task.done > .li-body > .li-text { color: var(--secondary); }
+  .li-body { flex: 1; min-width: 0; }
+  .box {
+    flex: none; position: relative;
+    width: 1.08em; height: 1.08em; margin-top: 0.235em;
+    padding: 0; border: 0; border-radius: 50%;
+    background: transparent; box-shadow: inset 0 0 0 1.5px var(--tertiary);
+    font: inherit; cursor: pointer;
+  }
+  .box:hover { box-shadow: inset 0 0 0 1.5px var(--accent); }
+  .box:focus-visible { outline-offset: 2px; border-radius: 50%; }
+  .box.done { background: var(--accent); box-shadow: none; }
+  .box.done::after {
+    content: ""; position: absolute; left: 50%; top: 46%;
+    width: 0.46em; height: 0.25em;
+    border: solid var(--page); border-width: 0 0 2px 2px;
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+  .page blockquote { padding-left: 1em; border-left: 3px solid var(--rule); color: var(--secondary); }
+  .page blockquote p + p { margin-top: 0.5em; }
+  .codeblock { position: relative; }
+  .codeblock pre { padding: 0.95em 1.15em; border-radius: 12px; background: var(--code-bg); overflow-x: auto; font: 0.84em/1.6 var(--mono); }
+  .codeblock pre code { padding: 0; background: none; font-size: inherit; border-radius: 0; }
+  .copy {
+    position: absolute; top: 8px; right: 8px;
+    padding: 5px 10px; border: 0; border-radius: 8px;
+    background: var(--page); color: var(--secondary);
+    box-shadow: 0 0 0 0.5px var(--glass-edge), 0 1px 4px rgba(0, 0, 0, 0.08);
+    font: 500 12px/1 var(--ui); cursor: pointer;
+    opacity: 0.85;
+  }
+  .copy:hover { color: var(--ink); opacity: 1; }
+  .table-wrap { overflow-x: auto; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--rule); }
+  .page table { width: 100%; border-collapse: collapse; font-size: 0.94em; }
+  .page th, .page td { padding: 0.6em 0.95em; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+  .page tr:last-child td { border-bottom: 0; }
+  .page th { font-weight: 650; background: color-mix(in srgb, var(--code-bg) 55%, transparent); }
+  .page hr { height: 1px; border: 0; background: var(--rule); margin: 0.6em 0; }
+  .page img { max-width: 100%; height: auto; vertical-align: middle; }
+  .page li img { display: block; margin: 0.8em 0 0.9em; }
+  .figure picture { display: block; }
+  .figure img { display: block; width: 100%; filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.16)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.08)); }
+  .placeholder { color: var(--tertiary); min-height: 1.55em; }
+  .hb { display: none; }
+
+  /* Links to the download render as the button they are. */
+  .page a[href$=".dmg"] {
+    display: inline-flex; align-items: center; gap: 0.45em;
+    margin: 0.1em 0.75em 0.1em 0; padding: 0.5em 1.1em;
+    border-radius: 999px; background: var(--accent); color: var(--on-accent);
+    font: 600 0.88em/1.2 var(--ui); text-decoration: none; vertical-align: middle;
+  }
+  .page a[href$=".dmg"]::before {
+    content: ""; width: 1.05em; height: 1.05em; flex: none; background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11'/%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3Cpath d='M5 20h14'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11'/%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3Cpath d='M5 20h14'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .page a[href$=".dmg"]:hover { background: var(--accent-hover); text-decoration: none; }
+
+  /* The open block: its Markdown, with the syntax dimmed and the styles kept. */
+  .editor {
+    min-height: 1.55em;
+    outline: none;
     white-space: pre-wrap;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    caret-color: var(--accent);
     tab-size: 4;
   }
-  .editor .mirror { color: var(--ink); min-height: 1.55em; }
-  .editor textarea {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    resize: none; overflow: hidden;
-    background: transparent;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-    caret-color: var(--accent);
-    outline: none;
+  .editor:empty::before { content: attr(data-placeholder); color: var(--tertiary); pointer-events: none; }
+  .editor .mk { color: var(--tertiary); font-weight: 400; font-style: normal; text-decoration: none; }
+  .editor strong { font-weight: 650; }
+  .editor code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 0.12em 0.1em; border-radius: 4px; }
+  .editor .lk { color: var(--link); }
+  .editor[data-kind="heading"][data-level="1"] { font-size: var(--h1); line-height: 1.08; letter-spacing: -0.028em; font-weight: 700; }
+  .editor[data-kind="heading"][data-level="2"] { font-size: var(--h2); line-height: 1.2; letter-spacing: -0.018em; font-weight: 700; }
+  .editor[data-kind="heading"][data-level="3"] { font-size: var(--h3); line-height: 1.3; letter-spacing: -0.01em; font-weight: 650; }
+  .editor[data-kind="heading"][data-level="4"], .editor[data-kind="heading"][data-level="5"], .editor[data-kind="heading"][data-level="6"] { font-weight: 650; }
+  .editor[data-kind="code"], .editor[data-kind="table"] { font-family: var(--mono); font-size: 0.84em; line-height: 1.6; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+  .editor[data-kind="code"] code, .editor[data-kind="table"] code { font-size: 1em; }
+  .editor[data-kind="quote"] { color: var(--secondary); }
+  .tk-k { color: var(--tk-k); }
+  .tk-s { color: var(--tk-s); }
+  .tk-n { color: var(--tk-n); }
+  .tk-t { color: var(--tk-t); }
+  .tk-c { color: var(--tk-c); font-style: italic; }
+  ::highlight(find) { background-color: var(--find); }
+  ::highlight(find-current) { background-color: var(--find-current); }
+
+  /* Menus. */
+  .popover {
+    position: fixed; z-index: 50;
+    min-width: 236px; max-width: calc(100vw - 16px);
+    padding: 6px; border-radius: 14px;
+    background: var(--menu); color: var(--ink);
+    box-shadow: 0 0 0 0.5px var(--glass-edge), 0 18px 50px -12px rgba(0, 0, 0, 0.35), 0 4px 12px -4px rgba(0, 0, 0, 0.12);
+    font: 13.5px/1.3 var(--ui);
   }
-  .editor textarea::selection { background: color-mix(in srgb, var(--accent) 28%, transparent); }
-  .editor.heading { font-size: 30px; font-weight: 700; letter-spacing: -0.022em; }
-  .editor.heading .mirror, .editor.heading textarea { line-height: 1.15; }
-  .mirror .mk { color: var(--syntax); }
+  .menu-label { padding: 7px 10px 5px; font-size: 11.5px; font-weight: 600; color: var(--secondary); }
+  .menu-label small { font-weight: 400; }
+  .menu-item {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; padding: 6px 10px; border: 0; border-radius: 8px;
+    background: none; text-align: left; cursor: pointer;
+  }
+  .menu-item:hover:not(:disabled), .menu-item:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
+  .menu-item:disabled { color: var(--tertiary); cursor: default; }
+  .menu-item .check { width: 14px; flex: none; text-align: center; }
+  .menu-item kbd { margin-left: auto; padding-left: 16px; font: inherit; opacity: 0.55; }
+  .menu-item .st-title { font-size: 17px; font-weight: 700; }
+  .menu-item .st-heading { font-size: 15px; font-weight: 700; }
+  .menu-item .st-sub { font-size: 14px; font-weight: 600; }
+  .menu-item .st-mono { font-family: var(--mono); font-size: 12.5px; }
+  .menu-sep { height: 1px; margin: 6px 4px; background: var(--rule); }
+  .seg { display: flex; gap: 2px; margin: 0 6px 6px; padding: 2px; border-radius: 9px; background: var(--fill); }
+  .seg button { flex: 1; padding: 6px 8px; border: 0; border-radius: 7px; background: none; font-size: 12.5px; white-space: nowrap; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--page); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14); font-weight: 600; }
+  .seg .f-sans { font-family: var(--sans); }
+  .seg .f-serif { font-family: var(--serif); }
+  .seg .f-mono { font-family: var(--mono); font-size: 11.5px; }
+  .stepper { display: flex; align-items: center; gap: 8px; margin: 0 6px 6px; }
+  .stepper button { width: 38px; height: 30px; border: 0; border-radius: 8px; background: var(--fill); cursor: pointer; }
+  .stepper button:hover { background: var(--row); }
+  .stepper .small { font-size: 11px; }
+  .stepper .large { font-size: 16px; }
+  .stepper output { flex: 1; text-align: center; color: var(--secondary); font-variant-numeric: tabular-nums; }
 
-  /* Features */
-  .features { background: var(--page); }
-  .feature-list { display: grid; gap: 28px 56px; margin: 36px 0 0; }
-  @media (min-width: 760px) { .feature-list { grid-template-columns: 1fr 1fr; } }
-  @media (min-width: 1100px) { .feature-list { grid-template-columns: 1fr 1fr 1fr; } }
-  .feature-list dt { font-size: 20px; font-weight: 650; letter-spacing: -0.012em; display: flex; align-items: center; gap: 10px; }
-  .feature-list dt svg { width: 22px; height: 22px; color: var(--accent); flex: none; }
-  .feature-list dd { margin: 8px 0 0; color: var(--muted); font-size: 17px; line-height: 1.55; max-width: 34em; }
+  .drop {
+    position: fixed; inset: 0; z-index: 60;
+    display: none; place-items: center; padding: 20px;
+    background: color-mix(in srgb, var(--page) 72%, transparent);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .dropping .drop { display: grid; }
+  .drop-card {
+    padding: 44px 56px; border: 2px dashed var(--accent); border-radius: 24px;
+    background: var(--page); text-align: center;
+    font: 600 20px/1.3 var(--ui);
+  }
+  .drop-card small { display: block; margin-top: 8px; font-size: 14px; font-weight: 400; color: var(--secondary); }
 
-  /* Download */
-  .download .layout { display: grid; gap: 48px 80px; align-items: start; }
-  @media (min-width: 900px) { .download .layout { grid-template-columns: auto minmax(0, 1fr); } }
-  .download .icon { width: clamp(140px, 18vw, 220px); }
-  .download .actions { margin-top: 30px; }
-  .requirements { margin: 26px 0 0; padding: 0; list-style: none; font-size: 16px; color: var(--muted); }
-  .requirements li + li { margin-top: 4px; }
-  .note { margin: 34px 0 0; max-width: var(--measure); font-size: 16px; color: var(--muted); line-height: 1.6; }
-  .note strong { color: var(--ink); font-weight: 600; }
-  .source-steps { margin: 34px 0 0; max-width: 640px; }
-  .source-steps h3 { margin: 0 0 12px; font-size: 18px; font-weight: 650; }
-  .terminal {
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; z-index: 55;
     display: flex; align-items: center; gap: 12px;
-    padding: 6px 8px 6px 20px;
-    border-radius: 14px;
-    background: var(--canvas);
+    max-width: calc(100vw - 32px);
+    padding: 9px 9px 9px 18px; border-radius: 999px;
+    background: var(--ink); color: var(--page);
+    box-shadow: 0 12px 34px -10px rgba(0, 0, 0, 0.45);
+    font: 14px/1.3 var(--ui);
+    opacity: 0; transform: translate(-50%, 14px); pointer-events: none;
+    transition: opacity 0.22s, transform 0.22s;
   }
-  .terminal pre {
-    flex: 1; min-width: 0; margin: 0; padding: 12px 0;
-    font: 15px/1.6 var(--mono);
-    white-space: pre-wrap; overflow-wrap: anywhere;
-  }
-  .terminal code { font: inherit; }
-  .terminal .prompt { color: var(--syntax); user-select: none; }
-  .terminal .copy {
-    flex: none; min-width: 72px; padding: 8px 14px; border: 0; border-radius: 10px;
-    background: var(--page); color: var(--ink);
-    font: 500 14px/1 var(--sans); cursor: pointer;
-    box-shadow: 0 0 0 1px var(--rule);
-  }
-  .terminal .copy:hover { box-shadow: 0 0 0 1px var(--muted); }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .toast:not(:has(button)) { padding-right: 18px; }
+  .toast button { flex: none; padding: 7px 13px; border: 0; border-radius: 999px; background: color-mix(in srgb, var(--page) 20%, transparent); font-weight: 600; cursor: pointer; }
 
-  /* Comparison */
-  .compare-table { width: 100%; max-width: 980px; margin: 32px 0 0; border-collapse: collapse; font-size: 16px; }
-  .compare-table caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .compare-table th, .compare-table td { padding: 15px 18px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
-  .compare-table thead th { font-size: 14px; font-weight: 600; color: var(--muted); border-bottom-width: 1.5px; }
-  .compare-table tbody th { font-weight: 500; }
-  .compare-table td { color: var(--muted); }
-  .compare-table .us { background: var(--page); color: var(--ink); font-weight: 600; }
-  .compare-table thead .us { color: var(--accent); border-radius: 12px 12px 0 0; }
-  .compare-table tbody tr:last-child .us { border-radius: 0 0 12px 12px; }
-  .compare-scroll { overflow-x: auto; }
-
-  /* Privacy */
-  .privacy { background: var(--ink); color: var(--page); }
-  .privacy .md-mark { color: color-mix(in srgb, var(--page) 40%, transparent); }
-  .privacy-statement { margin: 26px 0 0; max-width: 34em; font-size: clamp(20px, 2.2vw, 26px); line-height: 1.45; color: color-mix(in srgb, var(--page) 78%, transparent); letter-spacing: -0.01em; }
-  @media (prefers-color-scheme: dark) { .privacy { background: #000; color: var(--ink); } .privacy-statement { color: var(--muted); } .privacy .md-mark { color: var(--syntax); } }
-
-  /* First launch */
-  .first-launch { margin: clamp(56px, 7vw, 88px) auto 0; }
-  .first-launch h3 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -0.015em; }
-  .first-launch-intro { margin: 10px 0 0; max-width: var(--measure); font-size: 16px; color: var(--muted); line-height: 1.55; }
-  .steps { display: grid; gap: 28px; margin: 26px 0 0; padding: 0; list-style: none; counter-reset: step; }
-  @media (min-width: 760px) { .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .steps li { counter-increment: step; }
-  .steps p { margin: 14px 0 0; font-size: 15px; line-height: 1.5; color: var(--muted); }
-  .steps p strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
-  .steps p::before {
-    content: counter(step);
-    display: inline-grid; place-items: center;
-    width: 22px; height: 22px; margin-right: 8px; border-radius: 50%;
-    background: var(--accent); color: var(--on-accent);
-    font: 600 13px/1 var(--sans); vertical-align: 1px; float: left;
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar, .main, .toast, .find, .block, .scrim { transition: none; }
   }
-  .mock {
-    min-height: 200px; border-radius: 14px; padding: 18px;
-    background: var(--canvas);
-    display: grid; place-items: center;
-    font: 12px/1.35 var(--sans); color: var(--ink);
-    user-select: none;
-  }
-  .mock-alert {
-    width: 100%; max-width: 250px; padding: 14px 14px 12px; border-radius: 14px;
-    background: var(--page); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 10px 28px -8px rgba(0, 0, 0, 0.30);
-    display: grid; justify-items: center; gap: 6px; text-align: center;
-  }
-  .mock-alert img { width: 34px; height: 34px; }
-  .mock-alert strong { font-size: 12.5px; }
-  .mock-alert span { font-size: 10.5px; color: var(--muted); }
-  .mock-buttons { display: flex; gap: 6px; width: 100%; margin-top: 4px; }
-  .mock-btn { flex: 1; padding: 5px 8px; border-radius: 7px; background: var(--fill); font-size: 11px; font-weight: 500; white-space: nowrap; color: var(--ink) !important; }
-  .mock-btn.default { background: #0a84ff; color: #fff !important; }
-  .mock-btn.ring { box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent); }
-  .mock-settings {
-    width: 100%; max-width: 300px; border-radius: 12px; overflow: hidden; text-align: left;
-    background: var(--page); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 10px 28px -8px rgba(0, 0, 0, 0.30);
-  }
-  .mock-settings .bar { padding: 8px 12px; font-weight: 600; font-size: 12px; border-bottom: 1px solid var(--rule); }
-  .mock-settings .row { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 12px; font-size: 11px; color: var(--muted); }
-  .mock-settings .row .mock-btn { flex: none; }
-  .mock-settings .label { padding: 10px 12px 0; font-size: 10px; font-weight: 600; color: var(--muted); }
-
-  footer { padding: 40px 0 56px; border-top: 1px solid var(--rule); font-size: 15px; color: var(--muted); }
-  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; }
-  footer nav { display: flex; gap: 22px; }
-  footer a { text-decoration: none; }
-  footer a:hover { color: var(--ink); }
-
-  @media (max-width: 560px) {
-    .site-nav .hide-small { display: none; }
-    h1 { font-size: 34px; }
-    .compare-table { font-size: 14px; }
-    .compare-table th, .compare-table td { padding: 12px 6px; }
-    .compare-table thead th { font-size: 12px; }
-    .button { width: 100%; justify-content: center; }
-  }
-  h1 .keep-together { white-space: nowrap; }
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="wrap">
-    <a class="brand" href="./"><img src="assets/icon-256.png" alt="" width="32" height="32">MDown</a>
-    <nav class="site-nav" aria-label="Primary">
-      <a class="hide-small" href="#try">Try it</a>
-      <a class="hide-small" href="#download">Download</a>
-      <a href="https://github.com/sandeepgangarapu/mdown">GitHub</a>
-    </nav>
+<div class="app" id="x-app">
+  <aside class="sidebar" id="x-sidebar" aria-label="Sidebar">
+    <div class="sb-head">
+      <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+      <div class="group"><button class="tb" type="button" data-action="sidebar" aria-label="Hide sidebar" title="Hide sidebar (⌃⌘S)"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="3.5"/><path d="M9.5 4.5v15M5.8 8.5h1.4M5.8 11.5h1.4"/></svg></button></div>
+    </div>
+    <div class="sb-scroll">
+      <h2 class="sb-label" id="x-open-label">Open</h2>
+      <ul class="doc-list" id="x-doc-list" aria-labelledby="x-open-label"></ul>
+      <h2 class="sb-label" id="x-contents-label">Contents</h2>
+      <nav aria-labelledby="x-contents-label"><ul class="outline" id="x-outline"></ul></nav>
+    </div>
+    <div class="sb-foot">
+      <button class="sb-new" type="button" data-action="new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New Document</button>
+      <button class="sb-open" type="button" data-action="open" aria-label="Open a Markdown file" title="Open a Markdown file (⌘O)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 7.5V6a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></button>
+    </div>
+  </aside>
+  <div class="scrim" data-action="close-drawer"></div>
+
+  <div class="main">
+    <header class="toolbar" id="x-toolbar">
+      <span class="lights tb-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+      <button class="tb tb-sidebar" type="button" data-action="sidebar" aria-label="Show sidebar" title="Show sidebar (⌃⌘S)"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="3.5"/><path d="M9.5 4.5v15M5.8 8.5h1.4M5.8 11.5h1.4"/></svg></button>
+      <div class="title" id="x-title" aria-live="polite"></div>
+      <div class="group" data-keep>
+        <button class="tb" type="button" id="x-aa" data-action="aa" aria-label="Text style and page settings" aria-haspopup="true" aria-expanded="false" title="Text style and page settings"><span class="aa">Aa</span></button>
+      </div>
+      <div class="formats" role="toolbar" aria-label="Format" data-keep>
+        <div class="group">
+          <button class="tb" type="button" data-format="bold" aria-label="Bold" title="Bold (⌘B)" aria-pressed="false" disabled><span class="gb">B</span></button>
+          <button class="tb" type="button" data-format="italic" aria-label="Italic" title="Italic (⌘I)" aria-pressed="false" disabled><span class="gi">I</span></button>
+          <button class="tb" type="button" data-format="strike" aria-label="Strikethrough" title="Strikethrough (⇧⌘X)" aria-pressed="false" disabled><span class="gs">S</span></button>
+          <button class="tb" type="button" data-format="code" aria-label="Code" title="Code" aria-pressed="false" disabled><svg viewBox="0 0 24 24"><path d="m8.5 7.5-4.5 4.5 4.5 4.5M15.5 7.5l4.5 4.5-4.5 4.5M13.3 5.5l-2.6 13"/></svg></button>
+          <button class="tb" type="button" data-format="link" aria-label="Add link" title="Add link (⌘K)" disabled><svg viewBox="0 0 24 24"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg></button>
+        </div>
+        <div class="group">
+          <button class="tb" type="button" data-format="bullet" aria-label="Bulleted list" title="Bulleted list" aria-pressed="false" disabled><svg viewBox="0 0 24 24"><path d="M9.5 7H20M9.5 12H20M9.5 17H20"/><circle cx="5" cy="7" r="1.15" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="5" cy="17" r="1.15" fill="currentColor" stroke="none"/></svg></button>
+          <button class="tb" type="button" data-format="ordered" aria-label="Numbered list" title="Numbered list" aria-pressed="false" disabled><svg viewBox="0 0 24 24"><path d="M10 7h10M10 12h10M10 17h10"/><path d="M4.4 5.4 5.6 4.7V9" stroke-width="1.4"/><path d="M4.3 11.1c.3-.6.8-.9 1.4-.9.7 0 1.2.5 1.2 1.1 0 .9-1.3 1.6-2.6 2.8h2.7" stroke-width="1.4"/><path d="M4.4 15.6c.3-.4.7-.6 1.3-.6.7 0 1.2.4 1.2 1s-.5 1-1.2 1c.8 0 1.3.4 1.3 1.1 0 .6-.6 1.1-1.3 1.1-.6 0-1.1-.3-1.4-.7" stroke-width="1.4"/></svg></button>
+          <button class="tb" type="button" data-format="task" aria-label="Checklist" title="Checklist (⇧⌘L)" aria-pressed="false" disabled><svg viewBox="0 0 24 24"><circle cx="5.5" cy="7" r="2.4"/><path d="m4.5 7 .8.8 1.4-1.5" stroke-width="1.4"/><circle cx="5.5" cy="16" r="2.4"/><path d="M10.5 7H20M10.5 16H20"/></svg></button>
+        </div>
+      </div>
+      <div class="group share-group" data-keep>
+        <button class="tb" type="button" id="x-share" data-action="share" aria-label="Save, copy, or open a file" aria-haspopup="true" aria-expanded="false" title="Save, copy, or open a file"><svg viewBox="0 0 24 24"><path d="M12 3.5v11M8 7l4-3.5L16 7"/><path d="M8.5 10.5H7a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6.5a2 2 0 0 0-2-2h-1.5"/></svg></button>
+      </div>
+      <label class="find" id="x-find" title="Find (⌘F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>
+        <input type="search" id="x-find-input" placeholder="Find" aria-label="Find in document" autocomplete="off" spellcheck="false">
+        <span class="find-count" id="x-find-count" aria-live="polite"></span>
+      </label>
+      <a class="get mac-only" href="https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg" aria-label="Download MDown for Mac"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>Download</span></a>
+      <button class="get other-only" type="button" data-action="send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>Send to Mac</span></button>
+    </header>
+
+    <main class="page" id="x-page" aria-label="Document"></main>
   </div>
-</header>
+</div>
 
-<main>
-  <div class="hero">
-    <div class="wrap">
-      <h1 class="md-heading"><span class="md-mark" aria-hidden="true">#</span>Read Markdown.<br>Edit when you <span class="keep-together">need to.</span></h1>
-      <p class="lede">We read Markdown more than we edit it. MDown opens it instantly as a clean page.</p>
-      <div class="actions mac-only">
-        <a class="button button-primary" href="https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
-          Download for Mac
-        </a>
-        <a class="button button-quiet" href="https://github.com/sandeepgangarapu/mdown">View source<span class="stars" data-stars hidden></span></a>
-      </div>
-      <p class="release-meta mac-only"><span data-release-line>MDown 1.1.2 · 4 MB · macOS 26+</span> · <a href="#first-launch">First launch help</a></p>
-      <div class="actions other-only">
-        <p class="other-note">For Mac. Save the link for later.</p>
-        <button class="button button-primary" type="button" data-share>Copy link</button>
-      </div>
-      <ul class="facts">
-        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Free</li>
-        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Open source</li>
-        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>Native Swift</li>
-      </ul>
-    </div>
-    <div class="shot">
-      <div class="loop">
-        <picture class="frame-plain">
-          <source type="image/webp" srcset="assets/hero-dark.webp" media="(prefers-color-scheme: dark)">
-          <source srcset="assets/hero-dark.png" media="(prefers-color-scheme: dark)">
-          <source type="image/webp" srcset="assets/hero-light.webp">
-          <img src="assets/hero-light.png" width="1800" height="1285" fetchpriority="high" alt="MDown showing an agent brief for a checkout redesign, typeset like a finished document, with three open files and the brief's headings in the sidebar.">
-        </picture>
-        <picture class="frame-edit" aria-hidden="true">
-          <source type="image/webp" srcset="assets/hero-dark-edit.webp" media="(prefers-color-scheme: dark)">
-          <source srcset="assets/hero-dark-edit.png" media="(prefers-color-scheme: dark)">
-          <source type="image/webp" srcset="assets/hero-light-edit.webp">
-          <img src="assets/hero-light-edit.png" width="1800" height="1285" alt="">
-        </picture>
-        <svg class="cursor" viewBox="0 0 22 30" aria-hidden="true"><path d="M2 2v22.5l5.6-5.4 3.9 8.9 3.7-1.6-3.8-8.6H19z" fill="#000" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
-      </div>
-      <p class="loop-caption">One click to edit. Click away to read. <a href="#try">Try it.</a></p>
-    </div>
-  </div>
+<div class="popover" id="x-aa-menu" data-keep hidden></div>
+<div class="popover" id="x-share-menu" data-keep hidden></div>
+<div class="drop" aria-hidden="true"><div class="drop-card">Drop to open in MDown<small>Your file stays in your browser.</small></div></div>
+<div class="toast" id="x-toast" role="status" aria-live="polite"></div>
+<input type="file" id="x-file" accept=".md,.markdown,.mdown,.mkd,.mkdn,.txt,text/markdown,text/plain" multiple hidden>
+<span id="x-edit-hint" hidden>Press Enter to edit this block.</span>
 
-  <section class="try" id="try" aria-labelledby="try-title">
-    <div class="wrap demo-layout">
-      <div>
-        <h2 class="md-heading" id="try-title"><span class="md-mark" aria-hidden="true">##</span>Try a quick edit.</h2>
-        <p class="section-intro">Click a block. Edit the Markdown. Click away to read.</p>
-        <p class="demo-hint"><kbd>esc</kbd> works too.</p>
-      </div>
-      <div class="demo-page" id="demo" aria-label="Live MDown page"></div>
-    </div>
-  </section>
+<!-- The documents this site is made of, as plain Markdown. -->
+<div class="sources">
+<pre class="md-source" data-name="MDown.md"># Read Markdown. Edit when you need to.
 
-  <section class="features" aria-labelledby="features-title">
-    <div class="wrap">
-      <h2 class="md-heading" id="features-title"><span class="md-mark" aria-hidden="true">##</span>Small on purpose.</h2>
-      <dl class="feature-list">
-        <div>
-          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Your files stay files</dt>
-          <dd>Plain .md files. No accounts, sync, or vaults.</dd>
-        </div>
-        <div>
-          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Native and quick</dt>
-          <dd>Opens instantly. Feels like your Mac.</dd>
-        </div>
-        <div>
-          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>Edit in place</dt>
-          <dd>Click a block to edit. Click away to read.</dd>
-        </div>
-        <div>
-          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg>Every open file in view</dt>
-          <dd>Open files and headings, together in the sidebar.</dd>
-        </div>
-        <div>
-          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M8 14h8"/></svg>Shortcuts you already know</dt>
-          <dd>⌘B for bold. ⌘K for links. ⌘F to find.</dd>
-        </div>
-        <div>
-          <dt><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5"/><path d="m16 7 5 5-5 5"/></svg>Free and open source</dt>
-          <dd>MIT licensed. Automatic updates included.</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
+We read Markdown more than we edit it. MDown opens it instantly as a clean page, and editing is one click away.
 
-  <section class="compare" aria-labelledby="compare-title">
-    <div class="wrap">
-      <h2 class="md-heading" id="compare-title"><span class="md-mark" aria-hidden="true">##</span>How it compares.</h2>
-      <div class="compare-scroll">
-        <table class="compare-table">
-          <caption>MDown compared with note apps and code editors</caption>
-          <thead>
-            <tr><td></td><th scope="col">Note apps</th><th scope="col">Code editors</th><th scope="col" class="us">MDown</th></tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">Opens instantly</th><td>Varies</td><td>Varies</td><td class="us">Yes</td></tr>
-            <tr><th scope="row">Opens ready to read</th><td>Varies</td><td>Preview mode</td><td class="us">Yes</td></tr>
-            <tr><th scope="row">Free</th><td>Varies</td><td>Varies</td><td class="us">Yes</td></tr>
-            <tr><th scope="row">Account, sync, or vault</th><td>Varies</td><td>Varies</td><td class="us">None needed</td></tr>
-            <tr><th scope="row">Main purpose</th><td>Notes</td><td>Code</td><td class="us">Markdown</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+**This website is a Markdown file.** Click any line to edit it, or drop your own `.md` file here.
 
-  <section class="privacy" aria-labelledby="privacy-title">
-    <div class="wrap">
-      <h2 class="md-heading" id="privacy-title"><span class="md-mark" aria-hidden="true">##</span>Your words stay on your Mac.</h2>
-      <p class="privacy-statement">No account or tracking. Only update checks and linked images use the internet.</p>
-    </div>
-  </section>
+[Download for Mac](https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg) [View source](https://github.com/sandeepgangarapu/mdown)
 
-  <section class="download" id="download" aria-labelledby="download-title">
-    <div class="wrap layout">
-      <img class="icon" src="assets/icon-512.png" width="512" height="512" alt="MDown app icon">
-      <div>
-        <h2 class="md-heading" id="download-title"><span class="md-mark" aria-hidden="true">##</span>Get MDown</h2>
-        <div class="actions mac-only">
-          <a class="button button-primary" href="https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
-            Download MDown.dmg
-          </a>
-          <a class="button button-quiet" href="https://github.com/sandeepgangarapu/mdown/releases">All releases</a>
-        </div>
-        <div class="actions other-only">
-          <p class="other-note">For macOS 26+. Save the link for later.</p>
-          <button class="button button-primary" type="button" data-share>Copy link</button>
-        </div>
-        <ul class="requirements">
-          <li data-release-line>MDown 1.1.2 · 4 MB · macOS 26+</li>
-          <li>Apple silicon and Intel. Automatic updates.</li>
-        </ul>
-        <div class="source-steps">
-          <h3>Or use Homebrew</h3>
-          <div class="terminal"><pre><span class="prompt" aria-hidden="true">$ </span><code>brew trust sandeepgangarapu/tap &amp;&amp; brew install --cask sandeepgangarapu/tap/mdown</code></pre><button class="copy" type="button" data-copy>Copy</button></div>
-        </div>
-      </div>
-    </div>
-        <div class="wrap first-launch" id="first-launch">
-          <h3>First launch</h3>
-          <p class="first-launch-intro">MDown isn’t notarized, so macOS asks you to confirm it once.</p>
-          <ol class="steps">
-            <li>
-              <div class="mock" aria-hidden="true">
-                <div class="mock-alert">
-                  <img src="assets/icon-256.png" alt="" width="34" height="34">
-                  <strong>“MDown” Not Opened</strong>
-                  <span>Apple could not verify “MDown” is free of malware that may harm your Mac.</span>
-                  <span class="mock-buttons"><span class="mock-btn">Move to Trash</span><span class="mock-btn default ring">Done</span></span>
-                </div>
-              </div>
-              <p><strong>Open MDown. Click Done.</strong></p>
-            </li>
-            <li>
-              <div class="mock" aria-hidden="true">
-                <div class="mock-settings">
-                  <div class="bar">Privacy &amp; Security</div>
-                  <div class="label">Security</div>
-                  <div class="row"><span>“MDown” was blocked to protect your Mac.</span><span class="mock-btn ring">Open Anyway</span></div>
-                </div>
-              </div>
-              <p><strong>Settings → Privacy &amp; Security.</strong> Scroll to Open Anyway.</p>
-            </li>
-            <li>
-              <div class="mock" aria-hidden="true">
-                <div class="mock-alert">
-                  <img src="assets/icon-256.png" alt="" width="34" height="34">
-                  <strong>Open “MDown”?</strong>
-                  <span>Confirm with Touch ID or your password.</span>
-                  <span class="mock-buttons"><span class="mock-btn">Cancel</span><span class="mock-btn default ring">Open Anyway</span></span>
-                </div>
-              </div>
-              <p><strong>Click Open Anyway and confirm.</strong> Use Touch ID or your password.</p>
-            </li>
-          </ol>
-        </div>
-  </section>
-</main>
+- [x] Free
+- [x] Open source
+- [x] Native Swift
 
-<footer>
-  <div class="wrap">
-    <span>Made by <a href="https://sandeepgangarapu.com">Sandeep Gangarapu</a>.</span>
-    <nav aria-label="Footer">
-      <a href="https://github.com/sandeepgangarapu/mdown">GitHub</a>
-      <a href="https://github.com/sandeepgangarapu/mdown/issues">Report an issue</a>
-      <a href="https://github.com/sandeepgangarapu/mdown/blob/main/LICENSE">License</a>
-    </nav>
-  </div>
-</footer>
+![MDown showing an agent brief for a checkout redesign, typeset like a finished document, with three open files and the brief’s headings in the sidebar.](assets/hero-light.png)
+
+## What it does
+
+- Opens Markdown instantly, as a clean page.
+- Click any block to edit the Markdown behind it. Click away to read.
+- Lists every open file, and its headings, in the sidebar.
+- Works with plain `.md` files. No accounts, sync, or vaults.
+- Keeps your words on your Mac. Only update checks and linked images go online.
+
+That’s it.
+
+MDown isn’t trying to be the most powerful Markdown editor. It’s trying to be the nicest place to read Markdown. [Why I made it](About.md).
+
+## Get MDown
+
+[Download MDown.dmg](https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg) [All releases](https://github.com/sandeepgangarapu/mdown/releases)
+
+MDown 1.1.2 · 4 MB · macOS 26+ · Apple silicon and Intel · Updates itself
+
+Or install it with Homebrew:
+
+```sh
+brew trust sandeepgangarapu/tap &amp;&amp; brew install --cask sandeepgangarapu/tap/mdown
+```
+
+&gt; MDown isn’t notarized, so macOS asks you to confirm it once. See [First launch](First%20launch.md).
+
+---
+
+Made by [Sandeep Gangarapu](https://sandeepgangarapu.com) · [About](About.md) · [GitHub](https://github.com/sandeepgangarapu/mdown) · [Report an issue](https://github.com/sandeepgangarapu/mdown/issues) · [License](https://github.com/sandeepgangarapu/mdown/blob/main/LICENSE)
+</pre>
+<pre class="md-source" data-name="About.md" data-hash="about"># About MDown
+
+We use Markdown more than ever, because AI speaks it. Plans, prompts, notes, and the answers that come back are all Markdown now. Most of the time I’m just reading them. Sometimes I fix a line or two.
+
+Every app I tried had that backwards. They took forever to open a file, then opened it in edit mode, full of symbols. Some weren’t free. Markdown wasn’t really why they existed, so they came with accounts, sync, and vaults.
+
+So I made MDown the other way around. It opens a Markdown file instantly, as a clean page. When you want to change something, click it, and the Markdown behind that block appears. Click away, and it’s a page again.
+
+No account, no sync, no vault. Your files stay plain `.md` files, wherever you keep them.
+
+## It’s yours too
+
+MDown is free, open source, and written in native Swift. Read the code, change what you don’t like, and send your fixes back. If something is broken or missing, [open an issue](https://github.com/sandeepgangarapu/mdown/issues).
+
+— Sandeep
+</pre>
+<pre class="md-source" data-name="First launch.md" data-hash="first-launch"># First launch
+
+MDown isn’t notarized, so macOS asks you to confirm it once.
+
+1. **Open MDown, then click Done.** macOS says it couldn’t verify that MDown is free of malware.
+   ![The “MDown” Not Opened alert, with the Done button highlighted.](assets/first-launch-1-light.png)
+2. **Open System Settings → Privacy &amp; Security.** Scroll down to Security, where it says MDown was blocked, and click **Open Anyway**.
+   ![Privacy and Security settings saying MDown was blocked, with the Open Anyway button highlighted.](assets/first-launch-2-light.png)
+3. **Click Open Anyway again and confirm** with Touch ID or your password.
+   ![The Open “MDown”? alert, with the Open Anyway button highlighted.](assets/first-launch-3-light.png)
+
+MDown opens normally from then on.
+
+[Back to MDown.md](MDown.md)
+</pre>
+</div>
 
 <script>
-// Version and size come from the same feed MDown's updater reads.
+(() => {
+"use strict";
+
+/* core:start — Markdown parsing and rendering. No DOM access, so it can be tested on its own. */
+
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const mk = (s) => (s ? `<span class="mk">${esc(s)}</span>` : "");
+
+const RE = {
+  fence: /^ {0,3}(`{3,}|~{3,})(.*)$/,
+  heading: /^ {0,3}#{1,6}(?:[ \t]|$)/,
+  hr: /^ {0,3}(?:(?:-[ \t]*){3,}|(?:\*[ \t]*){3,}|(?:_[ \t]*){3,})$/,
+  quote: /^ {0,3}>/,
+  table: /^\s*\|/,
+  list: /^\s*(?:[-*+]|\d{1,9}[.)])(?:[ \t]|$)/,
+  tableRule: /^\s*\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)*\|?\s*$/,
+};
+const HEAD = /^( {0,3}(#{1,6})(?:[ \t]+|$))(.*?)((?:[ \t]+#+)?[ \t]*)$/;
+const LI = /^(\s*)([-*+]|(\d{1,9})([.)]))([ \t]+|$)(\[[ xX]\](?:[ \t]+|$))?(.*)$/;
+const QP = /^ {0,3}>[ \t]?/;
+
+/* Inline: a small CommonMark-flavored parser. Every node keeps its raw marks, so the same tree
+   renders both the typeset text and the dimmed-syntax source. */
+
+function codeSpanEnd(s, i) {
+  let n = 0;
+  while (s[i + n] === "`") n++;
+  let j = i + n;
+  while (j < s.length) {
+    const k = s.indexOf("`".repeat(n), j);
+    if (k < 0) return -1;
+    let m = 0;
+    while (s[k + m] === "`") m++;
+    if (m === n) return k + n;
+    j = k + m;
+  }
+  return -1;
+}
+
+function matchLink(s, i) {
+  let depth = 0, j = i;
+  for (; j < s.length; j++) {
+    const c = s[j];
+    if (c === "\\") { j++; continue; }
+    if (c === "`") { const e = codeSpanEnd(s, j); if (e > 0) { j = e - 1; continue; } }
+    if (c === "[") depth++;
+    else if (c === "]" && --depth === 0) break;
+  }
+  if (j >= s.length || s[j + 1] !== "(") return null;
+  let k = j + 2, paren = 1;
+  for (; k < s.length; k++) {
+    const c = s[k];
+    if (c === "\\") { k++; continue; }
+    if (c === "(") paren++;
+    else if (c === ")" && --paren === 0) break;
+  }
+  if (k >= s.length) return null;
+  const inner = s.slice(j + 2, k).trim();
+  const m = inner.match(/^<([^>]*)>/) || inner.match(/^(\S*)/);
+  return { textEnd: j, end: k + 1, url: m[1] };
+}
+
+const WORDY = /[\p{L}\p{N}]/u;
+
+function matchEmph(s, i) {
+  const c = s[i];
+  let len = 1;
+  while (s[i + len] === c) len++;
+  if (c === "~" ? len !== 2 : len > 3) return null;
+  const next = s[i + len];
+  if (!next || /\s/.test(next)) return null;
+  if (c === "_" && i > 0 && WORDY.test(s[i - 1])) return null;
+  let j = i + len + 1;
+  while (j < s.length) {
+    const ch = s[j];
+    if (ch === "\\") { j += 2; continue; }
+    if (ch === "`") { const e = codeSpanEnd(s, j); if (e > 0) { j = e; continue; } }
+    if (ch === "[") { const m = matchLink(s, j); if (m) { j = m.end; continue; } }
+    if (ch === c) {
+      let run = 0;
+      while (s[j + run] === c) run++;
+      if (run === len && !/\s/.test(s[j - 1]) && !(c === "_" && WORDY.test(s[j + run] || ""))) {
+        const kids = parseInline(s.slice(i + len, j));
+        let node;
+        if (len === 3) node = { t: "strong", mark: c + c, kids: [{ t: "em", mark: c, kids }] };
+        else node = { t: c === "~" ? "del" : len === 1 ? "em" : "strong", mark: c.repeat(len), kids };
+        return { node, end: j + run };
+      }
+      j += run;
+      continue;
+    }
+    j++;
+  }
+  return null;
+}
+
+function parseInline(s) {
+  const out = [];
+  let buf = "", i = 0;
+  const flush = () => { if (buf) { out.push({ t: "text", v: buf }); buf = ""; } };
+  while (i < s.length) {
+    const c = s[i];
+    if (c === "\\" && /[!-/:-@[-`{-~]/.test(s[i + 1] || "")) {
+      flush(); out.push({ t: "esc", v: s[i + 1] }); i += 2; continue;
+    }
+    if (c === "`") {
+      let n = 0;
+      while (s[i + n] === "`") n++;
+      const e = codeSpanEnd(s, i);
+      if (e > 0) { flush(); out.push({ t: "code", mark: s.slice(i, i + n), v: s.slice(i + n, e - n) }); i = e; continue; }
+      buf += s.slice(i, i + n); i += n; continue;
+    }
+    if (c === "!" && s[i + 1] === "[") {
+      const m = matchLink(s, i + 1);
+      if (m) { flush(); out.push({ t: "img", raw: s.slice(i, m.end), alt: s.slice(i + 2, m.textEnd), url: m.url }); i = m.end; continue; }
+    }
+    if (c === "[") {
+      const m = matchLink(s, i);
+      if (m) { flush(); out.push({ t: "link", kids: parseInline(s.slice(i + 1, m.textEnd)), tail: s.slice(m.textEnd, m.end), url: m.url }); i = m.end; continue; }
+    }
+    if (c === "*" || c === "_" || c === "~") {
+      const m = matchEmph(s, i);
+      if (m) { flush(); out.push(m.node); i = m.end; continue; }
+      let n = 0;
+      while (s[i + n] === c) n++;
+      buf += s.slice(i, i + n); i += n; continue;
+    }
+    if (c === "h" && (i === 0 || /[\s(*_~]/.test(s[i - 1]))) {
+      const m = s.slice(i).match(/^https?:\/\/[^\s<]*[^\s<.,:;"')\]!?*_~]/);
+      if (m) { flush(); out.push({ t: "auto", v: m[0] }); i += m[0].length; continue; }
+    }
+    buf += c; i++;
+  }
+  flush();
+  return out;
+}
+
+function rawInline(nodes) {
+  return nodes.map((n) => {
+    switch (n.t) {
+      case "text": case "auto": return n.v;
+      case "esc": return "\\" + n.v;
+      case "code": return n.mark + n.v + n.mark;
+      case "link": return "[" + rawInline(n.kids) + n.tail;
+      case "img": return n.raw;
+      default: return n.mark + rawInline(n.kids) + n.mark;
+    }
+  }).join("");
+}
+
+function plainInline(nodes) {
+  return nodes.map((n) => {
+    switch (n.t) {
+      case "text": case "auto": case "esc": case "code": return n.v;
+      case "img": return n.alt;
+      default: return plainInline(n.kids);
+    }
+  }).join("");
+}
+
+function safeUrl(u, image) {
+  u = (u || "").trim();
+  if (/^(https?:|mailto:)/i.test(u)) return u;
+  if (image && /^data:image\/(png|jpe?g|gif|webp);/i.test(u)) return u;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return null;
+  return u;
+}
+
+function decodeSafe(u) { try { return decodeURIComponent(u); } catch { return u; } }
+
+function linkHtml(url, inner) {
+  const u = safeUrl(url);
+  if (u === null) return `<span>${inner}</span>`;
+  let attrs = "";
+  if (!/^[a-z]+:/i.test(u) && /\.(md|markdown)(#.*)?$/i.test(u)) attrs = ` data-doc="${esc(decodeSafe(u.replace(/#.*$/, "")))}"`;
+  else if (/^https?:/i.test(u) && !/\.dmg$/i.test(u)) attrs = ' target="_blank" rel="noopener"';
+  return `<a href="${esc(u)}"${attrs}>${inner}</a>`;
+}
+
+const IMAGE_SIZES = {
+  "assets/hero-light.png": [1800, 1285],
+  "assets/screenshot-light.png": [1800, 1332],
+  "assets/first-launch-1-light.png": [680, 340],
+  "assets/first-launch-2-light.png": [680, 340],
+  "assets/first-launch-3-light.png": [680, 340],
+};
+
+function imgHtml(url, alt, eager) {
+  const u = safeUrl(url, true);
+  if (u === null) return "";
+  const size = IMAGE_SIZES[u] ? ` width="${IMAGE_SIZES[u][0]}" height="${IMAGE_SIZES[u][1]}"` : "";
+  const img = `<img src="${esc(u)}" alt="${esc(alt)}"${size} loading="${eager ? "eager" : "lazy"}" decoding="async">`;
+  const m = u.match(/^(assets\/[\w-]+)-light\.png$/);
+  if (!m) return img;
+  return `<picture><source type="image/webp" srcset="${m[1]}-dark.webp" media="(prefers-color-scheme: dark)"><source srcset="${m[1]}-dark.png" media="(prefers-color-scheme: dark)"><source type="image/webp" srcset="${m[1]}-light.webp">${img}</picture>`;
+}
+
+function renderInline(nodes) {
+  let h = "";
+  for (const n of nodes) {
+    switch (n.t) {
+      case "text":
+        h += esc(n.v).replace(/( {2,})\n/g, "$1<br>\n").replace(/\\\n/g, '<span class="hb">\\</span><br>\n');
+        break;
+      case "esc": h += esc(n.v); break;
+      case "code": h += `<code>${esc(n.v)}</code>`; break;
+      case "strong": h += `<strong>${renderInline(n.kids)}</strong>`; break;
+      case "em": h += `<em>${renderInline(n.kids)}</em>`; break;
+      case "del": h += `<s>${renderInline(n.kids)}</s>`; break;
+      case "link": h += linkHtml(n.url, renderInline(n.kids)); break;
+      case "auto": h += linkHtml(n.v, esc(n.v)); break;
+      case "img": h += imgHtml(n.url, n.alt, false); break;
+    }
+  }
+  return h;
+}
+
+function sourceInline(nodes) {
+  let h = "";
+  for (const n of nodes) {
+    switch (n.t) {
+      case "text": h += esc(n.v); break;
+      case "esc": h += mk("\\") + esc(n.v); break;
+      case "code": h += mk(n.mark) + `<code>${esc(n.v)}</code>` + mk(n.mark); break;
+      case "strong": h += mk(n.mark) + `<strong>${sourceInline(n.kids)}</strong>` + mk(n.mark); break;
+      case "em": h += mk(n.mark) + `<em>${sourceInline(n.kids)}</em>` + mk(n.mark); break;
+      case "del": h += mk(n.mark) + `<s>${sourceInline(n.kids)}</s>` + mk(n.mark); break;
+      case "link": h += mk("[") + `<span class="lk">${sourceInline(n.kids)}</span>` + mk(n.tail); break;
+      case "auto": h += `<span class="lk">${esc(n.v)}</span>`; break;
+      case "img": h += mk(n.raw); break;
+    }
+  }
+  return h;
+}
+
+/* Blocks: paragraphs, headings, lists, quotes, tables, code, rules, and pictures. Each block is
+   what opens for editing, the way it is in MDown. */
+
+function splitRanges(lines) {
+  const out = [];
+  let start = -1, kind = null;
+  const close = (end) => { if (start >= 0) out.push([start, end]); start = -1; kind = null; };
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const f = line.match(RE.fence);
+    if (f) {
+      close(i);
+      const closeRe = new RegExp("^ {0,3}" + (f[1][0] === "`" ? "`" : "~") + "{" + f[1].length + ",}\\s*$");
+      let j = i + 1;
+      while (j < lines.length && !closeRe.test(lines[j])) j++;
+      const end = Math.min(j + 1, lines.length);
+      out.push([i, end]);
+      i = end - 1;
+      continue;
+    }
+    if (!line.trim()) { close(i); continue; }
+    if (RE.heading.test(line) || RE.hr.test(line)) { close(i); out.push([i, i + 1]); continue; }
+    const k = RE.quote.test(line) ? "quote" : RE.table.test(line) ? "table" : RE.list.test(line) ? "list" : "para";
+    if (kind) {
+      const joins = (kind === k && k !== "list") || (kind === "list" && (k === "list" || k === "para")) || (kind === "quote" && k === "para");
+      if (joins) continue;
+      close(i);
+    }
+    start = i;
+    kind = k;
+  }
+  close(lines.length);
+  return out;
+}
+
+function splitBlocks(md) {
+  const lines = md.replace(/\r\n?/g, "\n").split("\n");
+  return splitRanges(lines).map(([a, b]) => lines.slice(a, b).join("\n"));
+}
+
+const isTable = (src) => { const lines = src.split("\n"); return lines.length >= 2 && RE.tableRule.test(lines[1]) && /[|]/.test(lines[0] + lines[1]); };
+
+function kindOf(src) {
+  const first = src.split("\n", 1)[0];
+  if (RE.fence.test(first)) return "code";
+  if (RE.heading.test(first)) return "heading";
+  if (RE.hr.test(first) && !src.includes("\n")) return "hr";
+  if (RE.quote.test(first)) return "quote";
+  if (RE.table.test(first) && isTable(src)) return "table";
+  if (RE.list.test(first)) return "list";
+  if (/^\s*!\[/.test(src)) {
+    const nodes = parseInline(src.trim());
+    if (nodes.length === 1 && nodes[0].t === "img") return "image";
+  }
+  return "para";
+}
+
+const headingLevel = (src) => (src.match(/^ {0,3}(#{1,6})/) || [0, "#"])[1].length;
+
+function codeParts(src) {
+  const lines = src.split("\n");
+  const f = lines[0].match(RE.fence);
+  const lang = (f ? f[2] : "").trim().split(/\s+/)[0] || "";
+  const closeRe = f ? new RegExp("^ {0,3}" + (f[1][0] === "`" ? "`" : "~") + "{" + f[1].length + ",}\\s*$") : null;
+  const closed = lines.length > 1 && closeRe && closeRe.test(lines[lines.length - 1]);
+  const bodyLines = lines.slice(1, closed ? -1 : undefined);
+  return { lang, closed, first: lines[0], last: closed ? lines[lines.length - 1] : null, bodyLines, body: bodyLines.join("\n") };
+}
+
+function listItems(src) {
+  const items = [];
+  src.split("\n").forEach((line, idx) => {
+    const m = line.match(LI);
+    if (m) {
+      items.push({ indent: m[1].replace(/\t/g, "    ").length, ordered: !!m[3], start: m[3] ? parseInt(m[3], 10) : 1, task: m[6] ? /x/i.test(m[6]) : null, text: m[7], line: idx });
+    } else if (items.length) {
+      items[items.length - 1].text += "\n" + line.replace(/^\s+/, "");
+    }
+  });
+  return items;
+}
+
+function renderItems(items, from, base) {
+  let out = "", open = null, i = from;
+  while (i < items.length && items[i].indent >= base) {
+    const it = items[i];
+    const tag = it.ordered ? "ol" : "ul";
+    if (open !== tag) {
+      if (open) out += `</${open}>`;
+      out += tag === "ol" ? `<ol${it.start !== 1 ? ` start="${it.start}"` : ""}>` : `<ul${it.task !== null ? ' class="tasks"' : ""}>`;
+      open = tag;
+    }
+    i++;
+    let kids = "";
+    if (i < items.length && items[i].indent > it.indent) {
+      const [h, next] = renderItems(items, i, items[i].indent);
+      kids = h;
+      i = next;
+    }
+    const text = renderInline(parseInline(it.text));
+    if (it.task !== null) {
+      out += `<li class="task${it.task ? " done" : ""}"><button type="button" class="box${it.task ? " done" : ""}" role="checkbox" aria-checked="${it.task}" aria-label="${esc(plainInline(parseInline(it.text)))}" data-line="${it.line}"></button><div class="li-body"><span class="li-text">${text}</span>${kids}</div></li>`;
+    } else {
+      out += `<li>${text}${kids}</li>`;
+    }
+  }
+  if (open) out += `</${open}>`;
+  return [out, i];
+}
+
+function renderList(src) {
+  const items = listItems(src);
+  if (!items.length) return `<p>${renderInline(parseInline(src))}</p>`;
+  return renderItems(items, 0, Math.min(...items.map((it) => it.indent)))[0];
+}
+
+function splitRow(line) {
+  const pieces = [];
+  let cur = "";
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === "\\" && line[i + 1] === "|") { cur += "\\|"; i++; continue; }
+    if (c === "`") { const e = codeSpanEnd(line, i); if (e > 0) { cur += line.slice(i, e); i = e - 1; continue; } }
+    if (c === "|") { pieces.push(cur, "|"); cur = ""; continue; }
+    cur += c;
+  }
+  pieces.push(cur);
+  return pieces;
+}
+
+function cellsOf(line) {
+  const cells = splitRow(line).filter((_, i) => i % 2 === 0);
+  if (line.trim().startsWith("|")) cells.shift();
+  if (line.trim().endsWith("|") && line.trim().length > 1 && cells.length) cells.pop();
+  return cells.map((c) => c.trim());
+}
+
+function renderTable(src) {
+  const lines = src.split("\n");
+  const head = cellsOf(lines[0]);
+  const align = cellsOf(lines[1]).map((c) => (/^:-+:$/.test(c) ? "center" : /^-+:$/.test(c) ? "right" : /^:-+$/.test(c) ? "left" : ""));
+  const cell = (tag, text, i) => `<${tag}${align[i] ? ` style="text-align:${align[i]}"` : ""}>${renderInline(parseInline(text))}</${tag}>`;
+  let h = `<div class="table-wrap"><table><thead><tr>${head.map((c, i) => cell("th", c, i)).join("")}</tr></thead>`;
+  const rows = lines.slice(2).filter((l) => l.trim());
+  if (rows.length) {
+    h += "<tbody>" + rows.map((l) => {
+      const cells = cellsOf(l);
+      while (cells.length < head.length) cells.push("");
+      return `<tr>${cells.map((c, i) => cell("td", c, i)).join("")}</tr>`;
+    }).join("") + "</tbody>";
+  }
+  return h + "</table></div>";
+}
+
+function renderQuote(src) {
+  const groups = [[]];
+  for (const line of src.split("\n")) {
+    const s = line.replace(QP, "");
+    if (!s.trim()) { if (groups[groups.length - 1].length) groups.push([]); }
+    else groups[groups.length - 1].push(s);
+  }
+  return `<blockquote>${groups.filter((g) => g.length).map((g) => `<p>${renderInline(parseInline(g.join("\n")))}</p>`).join("")}</blockquote>`;
+}
+
+function renderBlock(src) {
+  switch (kindOf(src)) {
+    case "heading": {
+      const m = src.match(HEAD);
+      const level = m[2].length;
+      return `<h${level}>${renderInline(parseInline(m[3]))}</h${level}>`;
+    }
+    case "hr": return "<hr>";
+    case "code": {
+      const { lang, body } = codeParts(src);
+      return `<div class="codeblock"><pre><code>${highlightCode(body, lang)}</code></pre><button class="copy" type="button" data-skip>Copy</button></div>`;
+    }
+    case "table": return renderTable(src);
+    case "list": return renderList(src);
+    case "quote": return renderQuote(src);
+    case "image": {
+      const img = parseInline(src.trim())[0];
+      return `<figure class="figure">${imgHtml(img.url, img.alt, true)}</figure>`;
+    }
+    default: return `<p>${renderInline(parseInline(src))}</p>`;
+  }
+}
+
+function sourceBlock(src) {
+  switch (kindOf(src)) {
+    case "heading": {
+      const m = src.match(HEAD);
+      return mk(m[1]) + sourceInline(parseInline(m[3])) + mk(m[4]);
+    }
+    case "hr": return mk(src);
+    case "code": {
+      const c = codeParts(src);
+      const parts = [mk(c.first)];
+      if (c.bodyLines.length) parts.push(highlightCode(c.body, c.lang));
+      if (c.closed) parts.push(mk(c.last));
+      return parts.join(mk("\n"));
+    }
+    case "table":
+      return src.split("\n").map((line, i) => {
+        if (i === 1) return mk(line);
+        return splitRow(line).map((piece, k) => {
+          if (k % 2) return mk(piece);
+          const m = piece.match(/^(\s*)([\s\S]*?)(\s*)$/);
+          return mk(m[1]) + sourceInline(parseInline(m[2])) + mk(m[3]);
+        }).join("");
+      }).join(mk("\n"));
+    case "list":
+      return src.split("\n").map((line, i) => {
+        const m = line.match(LI);
+        const sep = i === 0 ? "" : m ? mk("\n") : "\n";
+        if (m) return sep + mk(m[1] + m[2] + m[5] + (m[6] || "")) + sourceInline(parseInline(m[7]));
+        const ws = line.match(/^\s*/)[0];
+        return sep + mk(ws) + sourceInline(parseInline(line.slice(ws.length)));
+      }).join("");
+    case "quote":
+      return src.split("\n").map((line) => {
+        const m = line.match(QP);
+        return m ? mk(m[0]) + sourceInline(parseInline(line.slice(m[0].length))) : sourceInline(parseInline(line));
+      }).join("\n");
+    default: return sourceInline(parseInline(src));
+  }
+}
+
+/* The source of any text, even several blocks typed into one: each block is highlighted on its
+   own and the blank lines between them are kept exactly. */
+function sourceHTML(text) {
+  const lines = text.split("\n");
+  const groups = [];
+  let at = 0;
+  for (const [a, b] of splitRanges(lines)) {
+    if (a > at) groups.push(esc(lines.slice(at, a).join("\n")));
+    groups.push(sourceBlock(lines.slice(a, b).join("\n")));
+    at = b;
+  }
+  if (at < lines.length) groups.push(esc(lines.slice(at).join("\n")));
+  return groups.join("\n");
+}
+
+/* Code: a light lexer with the same token kinds as MDown's highlighter. */
+const KEYWORDS = new Set(("as async await break case catch class const continue def default defer deinit del do done elif else enum esac " +
+  "export extends extension fallthrough false fi final finally fn for from func function go guard if impl import in init " +
+  "interface is lambda let local loop match mod mut new nil none None null of override package pass private protocol pub " +
+  "public raise return self Self static struct super switch then this throw throws true True False try type typealias " +
+  "undefined use val var void where while with yield").split(" "));
+const TOKEN_PARTS = {
+  string: /"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\.|[^`\\])*`?/.source,
+  number: /\b(?:0x[\da-fA-F]+|\d[\d_]*(?:\.\d+)?)\b/.source,
+  word: /[A-Za-z_$][\w$]*/.source,
+  slash: /\/\/[^\n]*/.source,
+  block: /\/\*[\s\S]*?(?:\*\/|$)/.source,
+  hash: /#[^\n]*/.source,
+  html: /<!--[\s\S]*?(?:-->|$)/.source,
+};
+
+function highlightCode(code, lang) {
+  lang = (lang || "").toLowerCase();
+  if (!lang || /^(text|txt|plain|md|markdown)$/.test(lang)) return esc(code);
+  const hash = /^(sh|bash|zsh|shell|console|fish|python|py|ruby|rb|yaml|yml|toml|ini|conf|r|perl|make|makefile|dockerfile|elixir|ex)$/.test(lang);
+  const html = /^(html|xml|svg|vue)$/.test(lang);
+  const cLike = !hash && !html;
+  const comments = [cLike && lang !== "css" ? TOKEN_PARTS.slash : "", cLike ? TOKEN_PARTS.block : "", hash ? TOKEN_PARTS.hash : "", html ? TOKEN_PARTS.html : ""].filter(Boolean).join("|") || "(?!)";
+  const re = new RegExp(`(${comments})|(${TOKEN_PARTS.string})|(${TOKEN_PARTS.number})|(${TOKEN_PARTS.word})`, "g");
+  let out = "", last = 0, m;
+  while ((m = re.exec(code))) {
+    const tok = m[0];
+    if (!tok) { re.lastIndex++; continue; }
+    if (m.index > last) out += esc(code.slice(last, m.index));
+    const cls = m[1] ? "c" : m[2] ? "s" : m[3] ? "n" : KEYWORDS.has(tok) ? "k" : cLike && /^[A-Z]/.test(tok) ? "t" : "";
+    out += cls ? `<span class="tk-${cls}">${esc(tok)}</span>` : esc(tok);
+    last = m.index + tok.length;
+  }
+  return out + esc(code.slice(last));
+}
+
+const slugify = (text) => text.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "")
+  .replace(/[^\p{L}\p{N}\s-]/gu, "").trim().replace(/\s+/g, "-");
+
+/* core:end */
+
+if (typeof document === "undefined") {
+  globalThis.MDownCore = { parseInline, rawInline, plainInline, renderInline, sourceInline, splitBlocks, kindOf, renderBlock, sourceBlock, sourceHTML, highlightCode, slugify, listItems, cellsOf, splitRow };
+  return;
+}
+
+/* ---------- The app ---------- */
+
+const root = document.documentElement;
+const $ = (sel) => document.querySelector(sel);
+const page = $("#x-page");
+const toolbar = $("#x-toolbar");
+const titleEl = $("#x-title");
+const docListEl = $("#x-doc-list");
+const outlineEl = $("#x-outline");
+const findInput = $("#x-find-input");
+const findCount = $("#x-find-count");
+const aaMenu = $("#x-aa-menu");
+const shareMenu = $("#x-share-menu");
+const toastEl = $("#x-toast");
+const fileInput = $("#x-file");
+const fmtButtons = [...document.querySelectorAll("[data-format]")];
+const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const compact = matchMedia("(max-width: 1079px)");
+const DOC_ICON = '<svg viewBox="0 0 16 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M3 1h6.5L14.5 6v11a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2z"/><path d="M9.2 1.3V6.3h5"/><path d="M4.5 10.5h6M4.5 13.5h6M4.5 16.2h3.6" stroke-linecap="round"/></svg>';
+
+/* Settings, kept per browser like MDown's own. */
+const SETTINGS_KEY = "mdown.web.settings";
+const settings = { face: "sans", size: 18, theme: "paper", sidebar: true };
+try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}")); } catch {}
+function applySettings() {
+  root.setAttribute("data-face", settings.face);
+  root.setAttribute("data-page", settings.theme);
+  root.style.setProperty("--text-size", settings.size + "px");
+  root.classList.toggle("sidebar-hidden", !settings.sidebar);
+}
+function saveSettings() {
+  applySettings();
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch {}
+}
+applySettings();
+
+/* Documents. Edits live in memory only, so every visit starts from the real site. */
+let uidN = 0;
+const uid = () => "b" + ++uidN;
+const docs = [];
+let cur = null;
+let editing = null;
+
+const normalize = (text) => { const b = splitBlocks(text); return (b.length ? b.join("\n\n") : "") + "\n"; };
+
+function makeDoc(name, text, opts = {}) {
+  const doc = { name, original: text, norm: normalize(text), blocks: [], builtIn: !!opts.builtIn, hash: opts.hash || "", scrollY: 0 };
+  doc.blocks = toBlocks(text);
+  docs.push(doc);
+  return doc;
+}
+function toBlocks(text) {
+  const blocks = splitBlocks(text).map((src) => ({ id: uid(), src }));
+  return blocks.length ? blocks : [{ id: uid(), src: "" }];
+}
+function serialize(doc) {
+  const parts = doc.blocks.map((b) => (editing && doc === cur && editing.id === b.id ? getText(editing.ed) : b.src)).filter((s) => s.trim());
+  return (parts.length ? parts.join("\n\n") : "") + "\n";
+}
+const isDirty = (doc) => normalize(serialize(doc)) !== doc.norm;
+
+const blockById = (id) => cur.blocks.find((b) => b.id === id);
+const indexOf = (id) => cur.blocks.findIndex((b) => b.id === id);
+const elById = (id) => page.querySelector(`.block[data-id="${id}"]`);
+
+function blockClass(src) {
+  const kind = src ? kindOf(src) : "empty";
+  return "block k-" + kind + (kind === "heading" ? " lvl-" + headingLevel(src) : "");
+}
+
+function blockEl(b) {
+  const el = document.createElement("div");
+  el.className = blockClass(b.src);
+  el.dataset.id = b.id;
+  el.tabIndex = 0;
+  el.setAttribute("aria-describedby", "x-edit-hint");
+  el.innerHTML = b.src ? renderBlock(b.src) : `<p class="placeholder">${cur.blocks.length === 1 ? "Start writing" : ""}</p>`;
+  return el;
+}
+
+function renderDoc() {
+  page.replaceChildren(...cur.blocks.map(blockEl));
+  afterChange();
+}
+
+function afterChange() {
+  updateTitle();
+  renderDocList();
+  refreshOutline();
+}
+
+function updateTitle() {
+  const edited = isDirty(cur);
+  titleEl.innerHTML = `${esc(cur.name)}${edited ? '<span class="title-edited"> — Edited</span>' : ""}`;
+  document.title = cur.builtIn && cur.name === "MDown.md" && !edited ? "MDown — Read Markdown. Edit when you need to." : `${cur.name}${edited ? " — Edited" : ""} · MDown`;
+}
+
+function renderDocList() {
+  docListEl.innerHTML = docs.map((d, i) => `<li><button type="button" class="doc-item" data-doc-index="${i}"${d === cur ? ' aria-current="page"' : ""}>${DOC_ICON}<span class="doc-name">${esc(d.name)}</span>${isDirty(d) ? '<span class="doc-dot" title="Edited"></span>' : ""}</button>${d.builtIn ? "" : `<button type="button" class="doc-close" data-close-index="${i}" aria-label="Close ${esc(d.name)}">×</button>`}</li>`).join("");
+}
+
+/* Contents: the current document's headings, with the one you're reading marked. */
+let headings = [];
+let requestedHeading = null;
+
+function refreshOutline() {
+  const used = new Map();
+  headings = [...page.querySelectorAll(".block > h1, .block > h2, .block > h3, .block > h4, .block > h5, .block > h6")].map((h) => {
+    let slug = slugify(h.textContent) || "section";
+    const n = used.get(slug) || 0;
+    used.set(slug, n + 1);
+    if (n) slug += "-" + n;
+    h.id = slug;
+    return { el: h, id: slug, level: +h.tagName[1], text: h.textContent };
+  });
+  const min = Math.min(6, ...headings.map((h) => h.level));
+  outlineEl.innerHTML = headings.length
+    ? headings.map((h) => `<li><button type="button" class="ol-item" data-target="${esc(h.id)}" style="--lvl:${h.level - min}">${esc(h.text) || "&nbsp;"}</button></li>`).join("")
+    : '<li class="ol-empty">No headings</li>';
+  trackActive();
+}
+
+function trackActive() {
+  if (!headings.length) return;
+  let active = headings[0];
+  const requested = requestedHeading && headings.find((h) => h.id === requestedHeading);
+  if (requested) active = requested;
+  else {
+    const line = toolbar.offsetHeight + 28;
+    for (const h of headings) {
+      if (!h.el.isConnected) continue;
+      if (h.el.getBoundingClientRect().top <= line) active = h;
+      else break;
+    }
+    const doc = document.documentElement;
+    if (doc.scrollHeight > innerHeight + 40 && innerHeight + scrollY >= doc.scrollHeight - 2) active = headings[headings.length - 1];
+  }
+  for (const b of outlineEl.querySelectorAll(".ol-item")) b.classList.toggle("current", b.dataset.target === active.id);
+}
+
+let scrollQueued = false;
+addEventListener("scroll", () => {
+  if (scrollQueued) return;
+  scrollQueued = true;
+  requestAnimationFrame(() => { scrollQueued = false; trackActive(); });
+}, { passive: true });
+for (const type of ["wheel", "touchmove"]) addEventListener(type, () => { requestedHeading = null; }, { passive: true });
+addEventListener("keydown", (e) => { if (/^(Arrow|Page|Home|End| )/.test(e.key) && !editing) requestedHeading = null; });
+
+function scrollToId(id, smooth) {
+  const el = document.getElementById(id);
+  if (!el || !page.contains(el)) return false;
+  const top = el.getBoundingClientRect().top + scrollY - toolbar.offsetHeight - 18;
+  scrollTo({ top, behavior: smooth && !reduceMotion.matches ? "smooth" : "auto" });
+  return true;
+}
+
+outlineEl.addEventListener("click", (e) => {
+  const b = e.target.closest(".ol-item");
+  if (!b) return;
+  if (editing) commit();
+  requestedHeading = b.dataset.target;
+  scrollToId(b.dataset.target, true);
+  trackActive();
+  closeDrawer();
+});
+
+docListEl.addEventListener("click", (e) => {
+  const close = e.target.closest("[data-close-index]");
+  if (close) { closeDoc(docs[+close.dataset.closeIndex]); return; }
+  const item = e.target.closest("[data-doc-index]");
+  if (item) { const d = docs[+item.dataset.docIndex]; if (d !== cur) switchDoc(d); else closeDrawer(); }
+});
+
+function switchDoc(doc) {
+  if (editing) commit();
+  if (cur) cur.scrollY = scrollY;
+  cur = doc;
+  requestedHeading = null;
+  clearFind();
+  renderDoc();
+  scrollTo(0, doc.scrollY || 0);
+  history.replaceState(null, "", doc.hash ? "#" + doc.hash : location.pathname + location.search);
+  closeDrawer();
+}
+
+function closeDoc(doc) {
+  const i = docs.indexOf(doc);
+  if (i < 0 || doc.builtIn) return;
+  if (doc === cur && editing) { editing = null; root.classList.remove("is-editing"); }
+  docs.splice(i, 1);
+  if (doc === cur) { cur = null; switchDoc(docs[Math.max(0, i - 1)]); }
+  else renderDocList();
+}
+
+function newDoc() {
+  let n = 1, name = "Untitled.md";
+  while (docs.some((d) => d.name === name)) name = `Untitled ${++n}.md`;
+  const doc = makeDoc(name, "");
+  switchDoc(doc);
+  openBlock(doc.blocks[0].id, { at: "start" });
+}
+
+/* ---------- Editing a block ---------- */
+
+let editableMode = "plaintext-only";
+try { const probe = document.createElement("div"); probe.contentEditable = "plaintext-only"; if (probe.contentEditable !== "plaintext-only") editableMode = "true"; } catch { editableMode = "true"; }
+
+function getText(ed) {
+  let out = "";
+  const walk = (node) => {
+    for (const ch of node.childNodes) {
+      if (ch.nodeType === 3) out += ch.data;
+      else if (ch.nodeName === "BR") { if (!ch.hasAttribute("data-tail") && ch.getAttribute("type") !== "_moz") out += "\n"; }
+      else if (ch.nodeType === 1) {
+        if (/^(DIV|P)$/.test(ch.nodeName) && out && !out.endsWith("\n")) out += "\n";
+        walk(ch);
+      }
+    }
+  };
+  walk(ed);
+  return out.replace(/ /g, " ");
+}
+
+function offsetIn(rootEl, node, offset) {
+  const r = document.createRange();
+  r.selectNodeContents(rootEl);
+  r.setEnd(node, offset);
+  return r.toString().length;
+}
+
+function getSel(ed) {
+  const sel = getSelection();
+  if (!sel || !sel.rangeCount) return null;
+  const r = sel.getRangeAt(0);
+  if (!ed.contains(r.startContainer) || !ed.contains(r.endContainer)) return null;
+  return { s: offsetIn(ed, r.startContainer, r.startOffset), e: offsetIn(ed, r.endContainer, r.endOffset) };
+}
+
+function pointAt(rootEl, off) {
+  const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT);
+  let n, candidate = null;
+  while ((n = walker.nextNode())) {
+    if (candidate) return [n, 0];
+    if (off < n.length) return [n, off];
+    if (off === n.length) candidate = n;
+    else off -= n.length;
+  }
+  return candidate ? [candidate, candidate.length] : [rootEl, rootEl.childNodes.length];
+}
+
+function setCaret(ed, s, e = s) {
+  const sel = getSelection();
+  const r = document.createRange();
+  const [sn, so] = pointAt(ed, s);
+  const [en, eo] = pointAt(ed, e);
+  r.setStart(sn, so);
+  r.setEnd(en, eo);
+  sel.removeAllRanges();
+  sel.addRange(r);
+}
+
+/* Where a click lands in the typeset text, counted in visible characters. */
+function visibleOffsetAt(el, x, y) {
+  let node = null, offset = 0;
+  if (document.caretPositionFromPoint) {
+    const p = document.caretPositionFromPoint(x, y);
+    if (p) { node = p.offsetNode; offset = p.offset; }
+  } else if (document.caretRangeFromPoint) {
+    const r = document.caretRangeFromPoint(x, y);
+    if (r) { node = r.startContainer; offset = r.startOffset; }
+  }
+  if (!node || node.nodeType !== 3 || !el.contains(node)) return null;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.parentElement.closest("[data-skip]") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  });
+  let count = 0, n;
+  while ((n = walker.nextNode())) {
+    if (n === node) return count + offset;
+    count += n.length;
+  }
+  return null;
+}
+
+/* The same spot in the source: skip the dimmed syntax, count everything else. */
+function sourceOffsetFromVisible(ed, visible) {
+  const walker = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT);
+  let src = 0, n;
+  while ((n = walker.nextNode())) {
+    if (n.parentElement.closest(".mk")) { src += n.length; continue; }
+    if (visible <= n.length) return src + visible;
+    visible -= n.length;
+    src += n.length;
+  }
+  return src;
+}
+
+function paint(text, sel) {
+  const { ed, el } = editing;
+  ed.innerHTML = sourceHTML(text) + (text.endsWith("\n") ? '<br data-tail="">' : "");
+  const kind = text.trim() ? kindOf(text) : "para";
+  ed.dataset.kind = kind;
+  if (kind === "heading") ed.dataset.level = headingLevel(text);
+  else delete ed.dataset.level;
+  el.className = (text.trim() ? blockClass(text) : "block k-para").replace(/^block/, "block editing");
+  if (sel) setCaret(ed, sel.s, sel.e);
+}
+
+function openBlock(id, where = { at: "end" }) {
+  if (editing && editing.id === id) return;
+  const target = elById(id);
+  if (!target) return;
+  const before = target.getBoundingClientRect().top;
+  if (editing) commit();
+  const el = elById(id);
+  const b = blockById(id);
+  if (!el || !b) return;
+  clearFind();
+  closePopovers();
+
+  const ed = document.createElement("div");
+  ed.className = "editor";
+  ed.contentEditable = editableMode;
+  ed.spellcheck = false;
+  ed.setAttribute("role", "textbox");
+  ed.setAttribute("aria-multiline", "true");
+  ed.setAttribute("aria-label", "Markdown source of this block");
+  ed.setAttribute("autocapitalize", "off");
+  ed.setAttribute("autocorrect", "off");
+  ed.translate = false;
+  if (cur.blocks.length === 1 && !b.src) ed.dataset.placeholder = "Start writing";
+  el.removeAttribute("tabindex");
+  el.removeAttribute("aria-describedby");
+  el.replaceChildren(ed);
+
+  editing = { id, el, ed, hist: [], hi: -1, lastInput: 0, composing: false, sel: null };
+  paint(b.src, null);
+  let off = where.at === "start" ? 0 : b.src.length;
+  if (where.visible != null) off = sourceOffsetFromVisible(ed, where.visible);
+  else if (where.offset != null) off = Math.min(where.offset, b.src.length);
+  ed.focus({ preventScroll: true });
+  setCaret(ed, off, off);
+  editing.sel = { s: off, e: off };
+  pushHistory();
+
+  const dy = el.getBoundingClientRect().top - before;
+  if (Math.abs(dy) > 1) scrollBy(0, dy);
+  root.classList.add("is-editing");
+  syncToolbar();
+  ensureCaretVisible();
+
+  ed.addEventListener("input", onInput);
+  ed.addEventListener("keydown", onEditorKey);
+  ed.addEventListener("beforeinput", onBeforeInput);
+  ed.addEventListener("paste", onPaste);
+  ed.addEventListener("drop", onEditorDrop);
+  ed.addEventListener("compositionstart", () => { if (editing) editing.composing = true; });
+  ed.addEventListener("compositionend", () => { if (editing) { editing.composing = false; onInput(); } });
+  ed.addEventListener("focusout", (e) => {
+    const to = e.relatedTarget;
+    if (!editing || editing.ed !== ed || !to) return;
+    if (editing.el.contains(to) || to.closest("[data-keep]")) return;
+    commit();
+  });
+}
+
+function commit(opts = {}) {
+  if (!editing) return { index: -1, els: [] };
+  const { el, ed, id } = editing;
+  const text = getText(ed);
+  editing = null;
+  root.classList.remove("is-editing");
+  const index = indexOf(id);
+  const parts = text.trim() ? splitBlocks(text) : [];
+  const fresh = parts.map((src, k) => ({ id: k === 0 ? id : uid(), src }));
+  cur.blocks.splice(index, 1, ...fresh);
+  if (!cur.blocks.length && !opts.allowEmpty) {
+    const empty = { id: uid(), src: "" };
+    cur.blocks.push(empty);
+    fresh.push(empty);
+  }
+  const els = fresh.map(blockEl);
+  el.replaceWith(...els);
+  syncToolbar();
+  afterChange();
+  maybeExplainEdits();
+  return { index, els };
+}
+
+function ensureCaretVisible() {
+  const r = caretRect();
+  if (!r) return;
+  const top = toolbar.offsetHeight + 12;
+  if (r.top < top) scrollBy(0, r.top - top - 24);
+  else if (r.bottom > innerHeight - 12) scrollBy(0, r.bottom - innerHeight + 36);
+}
+
+function caretRect() {
+  const sel = getSelection();
+  if (!sel || !sel.rangeCount) return null;
+  const r = sel.getRangeAt(0).cloneRange();
+  r.collapse(false);
+  const rects = r.getClientRects();
+  const rect = rects[rects.length - 1];
+  return rect && rect.height ? rect : null;
+}
+
+/* Undo history for the open block. Quick typing groups into one step. */
+function snapshot() { const sel = getSel(editing.ed) || editing.sel || { s: 0, e: 0 }; return { text: getText(editing.ed), s: sel.s, e: sel.e }; }
+function pushHistory() {
+  const snap = snapshot();
+  editing.hist = editing.hist.slice(0, editing.hi + 1);
+  if (editing.hist.length && editing.hist[editing.hist.length - 1].text === snap.text) { editing.hist[editing.hist.length - 1] = snap; return; }
+  editing.hist.push(snap);
+  if (editing.hist.length > 300) editing.hist.shift();
+  editing.hi = editing.hist.length - 1;
+}
+function restore(step) {
+  const target = editing.hi + step;
+  if (target < 0 || target >= editing.hist.length) return;
+  editing.hi = target;
+  const h = editing.hist[target];
+  paint(h.text, { s: h.s, e: h.e });
+  editing.sel = { s: h.s, e: h.e };
+  editing.lastInput = 0;
+  syncToolbar();
+  ensureCaretVisible();
+}
+
+function onInput() {
+  if (!editing || editing.composing) return;
+  const sel = getSel(editing.ed);
+  const text = getText(editing.ed);
+  paint(text, sel);
+  editing.sel = sel;
+  const now = Date.now();
+  if (now - editing.lastInput > 900 || editing.hi < editing.hist.length - 1) pushHistory();
+  else editing.hist[editing.hi] = snapshot();
+  editing.lastInput = now;
+  markEditedSoon();
+  syncToolbar();
+}
+
+let editedTimer = 0;
+function markEditedSoon() {
+  clearTimeout(editedTimer);
+  editedTimer = setTimeout(() => { if (cur) updateTitle(); }, 250);
+}
+
+/* Replace the open block's text and selection in one undoable step. */
+function change(text, s, e = s) {
+  paint(text, { s, e });
+  editing.sel = { s, e };
+  pushHistory();
+  editing.lastInput = 0;
+  markEditedSoon();
+  syncToolbar();
+  ensureCaretVisible();
+}
+
+function currentSel() {
+  const ed = editing.ed;
+  const sel = getSel(ed);
+  if (sel) return sel;
+  ed.focus({ preventScroll: true });
+  const saved = editing.sel || { s: 0, e: 0 };
+  setCaret(ed, saved.s, saved.e);
+  return saved;
+}
+
+function insertText(str) {
+  const { s, e } = currentSel();
+  const text = getText(editing.ed);
+  change(text.slice(0, s) + str + text.slice(e), s + str.length);
+}
+
+function lineBounds(text, s) {
+  const start = text.lastIndexOf("\n", s - 1) + 1;
+  let end = text.indexOf("\n", s);
+  if (end < 0) end = text.length;
+  return [start, end];
+}
+
+function onEditorKey(e) {
+  if (!editing || e.isComposing || e.keyCode === 229) return;
+  const mod = isMac ? e.metaKey : e.ctrlKey;
+  const key = e.key;
+  if (key === "Escape") { e.preventDefault(); finishAndFocus(); return; }
+  if (mod && !e.altKey) {
+    const k = key.toLowerCase();
+    if (k === "z") { e.preventDefault(); restore(e.shiftKey ? 1 : -1); }
+    else if (k === "y" && !isMac) { e.preventDefault(); restore(1); }
+    else if (k === "b" && !e.shiftKey) { e.preventDefault(); act("bold"); }
+    else if (k === "i" && !e.shiftKey) { e.preventDefault(); act("italic"); }
+    else if (k === "k" && !e.shiftKey) { e.preventDefault(); act("link"); }
+    else if (k === "x" && e.shiftKey) { e.preventDefault(); act("strike"); }
+    else if (k === "l" && e.shiftKey) { e.preventDefault(); act("task"); }
+    else if (key === "Enter") { e.preventDefault(); finishAndFocus(); }
+    return;
+  }
+  if (key === "Enter") { e.preventDefault(); enter(e.shiftKey); return; }
+  if (key === "Tab") { if (indent(e.shiftKey)) e.preventDefault(); return; }
+  if (key === "Backspace") { if (backspaceAtStart()) e.preventDefault(); return; }
+  if (key.startsWith("Arrow") && !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) { if (arrow(key)) e.preventDefault(); }
+}
+
+function onBeforeInput(e) {
+  const t = e.inputType;
+  if (t === "insertParagraph" || t === "insertLineBreak") { e.preventDefault(); enter(t === "insertLineBreak"); }
+  else if (t === "historyUndo") { e.preventDefault(); restore(-1); }
+  else if (t === "historyRedo") { e.preventDefault(); restore(1); }
+  else if (t.startsWith("format")) {
+    e.preventDefault();
+    const map = { formatBold: "bold", formatItalic: "italic", formatStrikeThrough: "strike" };
+    if (map[t]) act(map[t]);
+  }
+}
+
+function onPaste(e) {
+  e.preventDefault();
+  const pasted = (e.clipboardData.getData("text/plain") || "").replace(/\r\n?/g, "\n");
+  if (!pasted) return;
+  const { s, e: end } = currentSel();
+  const text = getText(editing.ed);
+  if (end > s && /^https?:\/\/\S+$/.test(pasted.trim()) && !text.slice(s, end).includes("\n")) {
+    const linked = `[${text.slice(s, end)}](${pasted.trim()})`;
+    change(text.slice(0, s) + linked + text.slice(end), s + linked.length);
+    return;
+  }
+  insertText(pasted);
+}
+
+function onEditorDrop(e) {
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) return;
+  e.preventDefault();
+  const dropped = e.dataTransfer ? e.dataTransfer.getData("text/plain") : "";
+  if (dropped) insertText(dropped);
+}
+
+function finishAndFocus() {
+  const { els } = commit();
+  if (els[0]) els[0].focus({ preventScroll: true });
+}
+
+/* Return: next list item, next quote line, or a new block, the way MDown does it. */
+function enter(shift) {
+  const text = getText(editing.ed);
+  const { s, e } = currentSel();
+  const kind = kindOf(text);
+  const [ls, le] = lineBounds(text, s);
+  const line = text.slice(ls, le);
+  const insertNewline = (extra) => change(text.slice(0, s) + "\n" + extra + text.slice(e), s + 1 + extra.length);
+
+  if (kind === "code") {
+    const c = codeParts(text);
+    if (c.closed && s === text.length && !shift) return splitBlock(text, "", null);
+    return insertNewline(shift ? "" : line.match(/^[ \t]*/)[0]);
+  }
+  if (kind === "table") {
+    if (s === text.length && !shift) return splitBlock(text, "", null);
+    return insertNewline("");
+  }
+  if (shift) return insertNewline("");
+
+  if (kind === "list") {
+    const m = line.match(/^(\s*)([-*+]|(\d{1,9})([.)]))([ \t]+|$)(\[[ xX]\](?:[ \t]+|$))?/);
+    if (m) {
+      const rest = line.slice(m[0].length);
+      if (!rest.trim()) {
+        if (m[1].length) {
+          const cut = Math.min(2, m[1].length);
+          return change(text.slice(0, ls) + line.slice(cut) + text.slice(le), Math.max(ls, s - cut));
+        }
+        return splitBlock(text.slice(0, ls).replace(/\n$/, ""), "", text.slice(le).replace(/^\n/, ""));
+      }
+      const marker = m[3] ? `${parseInt(m[3], 10) + 1}${m[4]}` : m[2];
+      return insertNewline(m[1] + marker + " " + (m[6] ? "[ ] " : ""));
+    }
+  }
+  if (kind === "quote") {
+    const q = line.match(QP);
+    if (q) {
+      if (!line.slice(q[0].length).trim()) return splitBlock(text.slice(0, ls).replace(/\n$/, ""), "", text.slice(le).replace(/^\n/, ""));
+      return insertNewline(q[0].endsWith(" ") ? q[0] : q[0] + " ");
+    }
+  }
+  return splitBlock(text.slice(0, s), text.slice(e), null);
+}
+
+/* Keep `before` in this block, open a new block holding `middle`, and put `after` below it. */
+function splitBlock(before, middle, after) {
+  editing.ed.textContent = before;
+  const { index, els } = commit({ allowEmpty: true });
+  const pos = index + els.length;
+  const fresh = { id: uid(), src: middle };
+  const extra = after && after.trim() ? splitBlocks(after).map((src) => ({ id: uid(), src })) : [];
+  const ref = page.children[pos] || null;
+  cur.blocks.splice(pos, 0, fresh, ...extra);
+  for (const b of [fresh, ...extra]) page.insertBefore(blockEl(b), ref);
+  openBlock(fresh.id, { offset: 0 });
+}
+
+function backspaceAtStart() {
+  const sel = getSel(editing.ed);
+  if (!sel || sel.s !== 0 || sel.e !== 0) return false;
+  const index = indexOf(editing.id);
+  if (index <= 0) return false;
+  const prev = cur.blocks[index - 1];
+  const text = getText(editing.ed);
+  if (!text.trim()) {
+    editing.ed.textContent = "";
+    commit({ allowEmpty: true });
+    openBlock(prev.id, { at: "end" });
+    return true;
+  }
+  const prevKind = kindOf(prev.src);
+  if (kindOf(text) === "para" && ["para", "heading", "list", "quote"].includes(prevKind)) {
+    const { el } = editing;
+    editing = null;
+    root.classList.remove("is-editing");
+    cur.blocks.splice(index, 1);
+    el.remove();
+    const join = prev.src.length;
+    prev.src += text;
+    elById(prev.id).replaceWith(blockEl(prev));
+    openBlock(prev.id, { offset: join });
+    afterChange();
+    return true;
+  }
+  return false;
+}
+
+function arrow(key) {
+  const ed = editing.ed;
+  const text = getText(ed);
+  const sel = getSel(ed);
+  if (!sel || sel.s !== sel.e) return false;
+  const index = indexOf(editing.id);
+  const prev = cur.blocks[index - 1];
+  const next = cur.blocks[index + 1];
+  const up = (key === "ArrowUp" && atEdge(ed, "top", sel.s, text)) || (key === "ArrowLeft" && sel.s === 0);
+  const down = (key === "ArrowDown" && atEdge(ed, "bottom", sel.s, text)) || (key === "ArrowRight" && sel.s === text.length);
+  if (up && prev) { openBlock(prev.id, { at: "end" }); return true; }
+  if (down && next) { openBlock(next.id, { at: "start" }); return true; }
+  return false;
+}
+
+function atEdge(ed, side, s, text) {
+  const r = caretRect();
+  if (!r) return side === "top" ? !text.slice(0, s).includes("\n") : !text.slice(s).includes("\n");
+  const box = ed.getBoundingClientRect();
+  const lh = parseFloat(getComputedStyle(ed).lineHeight) || 26;
+  return side === "top" ? r.top - box.top < lh * 0.7 : box.bottom - r.bottom < lh * 0.7;
+}
+
+function indent(outdent) {
+  const text = getText(editing.ed);
+  const kind = kindOf(text);
+  const { s, e } = currentSel();
+  if (kind === "code" && !outdent) { insertText("    "); return true; }
+  if (kind !== "list") return false;
+  const [ls] = lineBounds(text, s);
+  const [, le] = lineBounds(text, e);
+  const lines = text.slice(ls, le).split("\n");
+  let delta0 = 0, total = 0;
+  const changed = lines.map((l, i) => {
+    if (!LI.test(l)) return l;
+    if (!outdent) { if (i === 0) delta0 = 2; total += 2; return "  " + l; }
+    const cut = Math.min(2, l.match(/^ */)[0].length);
+    if (i === 0) delta0 = -cut;
+    total -= cut;
+    return l.slice(cut);
+  });
+  change(text.slice(0, ls) + changed.join("\n") + text.slice(le), Math.max(ls, s + delta0), Math.max(ls, e + total));
+  return true;
+}
+
+/* Formatting: the toolbar, the Aa menu, and the shortcuts all come through here. */
+const STYLE_ACTIONS = ["h1", "h2", "h3", "body", "quote", "codeblock"];
+const PREFIX = /^\s{0,3}(?:#{1,6}[ \t]+|>[ \t]?|(?:[-*+]|\d{1,9}[.)])[ \t]+(?:\[[ xX]\][ \t]+)?)/;
+
+function act(action) {
+  if (!editing) return;
+  const text = getText(editing.ed);
+  const { s, e } = currentSel();
+  if (action === "bold") return wrap(text, s, e, "**");
+  if (action === "italic") return wrap(text, s, e, "*");
+  if (action === "strike") return wrap(text, s, e, "~~");
+  if (action === "code") return wrap(text, s, e, "`");
+  if (action === "link") return link(text, s, e);
+  if (action === "bullet" || action === "ordered" || action === "task") return listToggle(text, s, e, action);
+  if (STYLE_ACTIONS.includes(action)) return blockStyle(text, action);
+}
+
+function wordAround(text, s) {
+  let a = s, b = s;
+  while (a > 0 && WORDY.test(text[a - 1])) a--;
+  while (b < text.length && WORDY.test(text[b])) b++;
+  return a < b ? [a, b] : null;
+}
+
+function wrap(text, s, e, m) {
+  const n = m.length;
+  const before = text.slice(s - n, s), after = text.slice(e, e + n);
+  const lone = m !== "*" || (text[s - n - 1] !== "*" && text[e + n] !== "*") || (text.slice(s - 3, s) === "***");
+  if (before === m && after === m && lone) {
+    return change(text.slice(0, s - n) + text.slice(s, e) + text.slice(e + n), s - n, e - n);
+  }
+  const chosen = text.slice(s, e);
+  if (chosen.length >= 2 * n && chosen.startsWith(m) && chosen.endsWith(m)) {
+    return change(text.slice(0, s) + chosen.slice(n, -n) + text.slice(e), s, e - 2 * n);
+  }
+  if (s === e) {
+    const w = wordAround(text, s);
+    if (w) return change(text.slice(0, w[0]) + m + text.slice(w[0], w[1]) + m + text.slice(w[1]), s + n);
+    return change(text.slice(0, s) + m + m + text.slice(e), s + n);
+  }
+  while (s < e && /\s/.test(text[s])) s++;
+  while (e > s && /\s/.test(text[e - 1])) e--;
+  return change(text.slice(0, s) + m + text.slice(s, e) + m + text.slice(e), s + n, e + n);
+}
+
+function link(text, s, e) {
+  if (s === e) { const w = wordAround(text, s); if (w) [s, e] = w; }
+  const chosen = text.slice(s, e);
+  if (/^https?:\/\/\S+$/.test(chosen)) return change(text.slice(0, s) + `[](${chosen})` + text.slice(e), s + 1);
+  if (chosen) {
+    const at = s + chosen.length + 3;
+    return change(text.slice(0, s) + `[${chosen}](https://)` + text.slice(e), at, at + 8);
+  }
+  return change(text.slice(0, s) + "[link](https://)" + text.slice(e), s + 1, s + 5);
+}
+
+function listToggle(text, s, e, type) {
+  const [ls] = lineBounds(text, s);
+  const [, le] = lineBounds(text, e);
+  const lines = text.slice(ls, le).split("\n");
+  const is = (l) => type === "task" ? /^\s*[-*+][ \t]+\[[ xX]\]/.test(l) : type === "ordered" ? /^\s*\d{1,9}[.)][ \t]/.test(l) : /^\s*[-*+][ \t]+(?!\[[ xX]\])/.test(l);
+  const all = lines.filter((l) => l.trim()).every(is);
+  let n = 1;
+  const out = lines.map((l) => {
+    const ws = l.match(/^\s*/)[0];
+    const body = l.slice(ws.length).replace(PREFIX, "");
+    if (all) return ws + body;
+    if (!l.trim()) return l;
+    return ws + (type === "task" ? "- [ ] " : type === "ordered" ? `${n++}. ` : "- ") + body;
+  }).join("\n");
+  const delta = out.length - (le - ls);
+  const single = !text.slice(ls, le).includes("\n");
+  if (single) return change(text.slice(0, ls) + out + text.slice(le), Math.max(ls, s + delta), Math.max(ls, e + delta));
+  return change(text.slice(0, ls) + out + text.slice(le), ls, ls + out.length);
+}
+
+function blockStyle(text, style) {
+  const kind = kindOf(text);
+  let body = text;
+  if (kind === "code") { const c = codeParts(text); body = c.body; }
+  const lines = body.split("\n").map((l) => l.replace(PREFIX, ""));
+  let out;
+  if (style === "codeblock") out = kind === "code" ? lines.join("\n") : "```\n" + body + "\n```";
+  else if (style === "quote") out = kind === "quote" ? lines.join("\n") : lines.map((l) => "> " + l).join("\n");
+  else if (style === "body") out = lines.join("\n");
+  else {
+    const level = +style[1];
+    const same = kind === "heading" && headingLevel(text) === level;
+    const joined = lines.map((l) => l.trim()).filter(Boolean).join(" ");
+    out = same ? joined : "#".repeat(level) + " " + joined;
+  }
+  change(out, out.length);
+}
+
+function insideInline(line, col, type) {
+  let hit = false;
+  const walk = (nodes, pos) => {
+    for (const n of nodes) {
+      const len = rawInline([n]).length;
+      if (col > pos && col < pos + len) {
+        if (n.t === type) hit = true;
+        if (n.kids) walk(n.kids, pos + (n.t === "link" ? 1 : n.mark.length));
+      }
+      pos += len;
+    }
+  };
+  walk(parseInline(line), 0);
+  return hit;
+}
+
+function isActive(action) {
+  const text = getText(editing.ed);
+  const { s } = editing.sel || { s: 0 };
+  const [ls, le] = lineBounds(text, s);
+  const line = text.slice(ls, le);
+  const kind = text.trim() ? kindOf(text) : "para";
+  switch (action) {
+    case "bullet": return /^\s*[-*+][ \t]+(?!\[[ xX]\])/.test(line) && kind === "list";
+    case "ordered": return /^\s*\d{1,9}[.)][ \t]/.test(line) && kind === "list";
+    case "task": return /^\s*[-*+][ \t]+\[[ xX]\]/.test(line) && kind === "list";
+    case "h1": case "h2": case "h3": return kind === "heading" && Math.min(3, headingLevel(text)) === +action[1];
+    case "body": return kind === "para";
+    case "quote": return kind === "quote";
+    case "codeblock": return kind === "code";
+    case "bold": return insideInline(line, s - ls, "strong");
+    case "italic": return insideInline(line, s - ls, "em");
+    case "strike": return insideInline(line, s - ls, "del");
+    case "code": return insideInline(line, s - ls, "code");
+    default: return false;
+  }
+}
+
+let syncQueued = false;
+function syncToolbar() {
+  if (syncQueued) return;
+  syncQueued = true;
+  requestAnimationFrame(() => {
+    syncQueued = false;
+    const on = !!editing;
+    for (const b of fmtButtons) {
+      b.disabled = !on;
+      if (b.hasAttribute("aria-pressed")) b.setAttribute("aria-pressed", on && isActive(b.dataset.format) ? "true" : "false");
+    }
+    if (!aaMenu.hidden) renderAaMenu();
+  });
+}
+
+document.addEventListener("selectionchange", () => {
+  if (!editing) return;
+  const sel = getSel(editing.ed);
+  if (sel) { editing.sel = sel; syncToolbar(); }
+});
+
+/* ---------- Clicking the page ---------- */
+
+let suppressClick = false;
+let suppressTimer = 0;
+
+document.addEventListener("pointerdown", (e) => {
+  if (!editing || e.button > 0) return;
+  const t = e.target;
+  if (!(t instanceof Element) || editing.el.contains(t) || t.closest("[data-keep]")) return;
+  const el = t.closest("#x-page .block");
+  if (el && !t.closest("a, .box, .copy")) {
+    const visible = visibleOffsetAt(el, e.clientX, e.clientY);
+    e.preventDefault();
+    suppressClick = true;
+    clearTimeout(suppressTimer);
+    suppressTimer = setTimeout(() => { suppressClick = false; }, 800);
+    openBlock(el.dataset.id, visible != null ? { visible } : { at: "end" });
+    return;
+  }
+  commit();
+}, true);
+
+document.addEventListener("mousedown", (e) => {
+  if (suppressClick) { e.preventDefault(); return; }
+  if (editing && e.target instanceof Element && e.target.closest("[data-keep] button")) e.preventDefault();
+}, true);
+
+page.addEventListener("click", (e) => {
+  if (suppressClick) { suppressClick = false; return; }
+  const t = e.target;
+  const a = t.closest("a");
+  if (a && !t.closest(".editor")) { onLinkClick(a, e); return; }
+  const box = t.closest(".box");
+  if (box) { toggleTask(box); return; }
+  const copy = t.closest(".copy");
+  if (copy) { copyCode(copy); return; }
+  const el = t.closest(".block");
+  if (!el || el.classList.contains("editing")) return;
+  const sel = getSelection();
+  if (sel && !sel.isCollapsed && el.contains(sel.anchorNode)) return;
+  const visible = visibleOffsetAt(el, e.clientX, e.clientY);
+  openBlock(el.dataset.id, visible != null ? { visible } : { at: "end" });
+});
+
+page.addEventListener("keydown", (e) => {
+  const el = e.target;
+  if (!el.classList || !el.classList.contains("block") || el.classList.contains("editing")) return;
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openBlock(el.dataset.id, { at: "end" }); }
+});
+
+function onLinkClick(a, e) {
+  if (a.dataset.doc) {
+    const d = docs.find((x) => x.name.toLowerCase() === a.dataset.doc.toLowerCase());
+    if (d) { e.preventDefault(); switchDoc(d); }
+    return;
+  }
+  const href = a.getAttribute("href") || "";
+  if (/\.dmg$/i.test(href) && root.classList.contains("not-mac")) { e.preventDefault(); sendLink(); return; }
+  if (href.startsWith("#")) { e.preventDefault(); scrollToId(decodeSafe(href.slice(1)), true); }
+}
+
+function toggleTask(box) {
+  const el = box.closest(".block");
+  const b = blockById(el.dataset.id);
+  const n = +box.dataset.line;
+  const lines = b.src.split("\n");
+  lines[n] = lines[n].replace(/\[([ xX])\]/, (_, c) => (c === " " ? "[x]" : "[ ]"));
+  b.src = lines.join("\n");
+  const fresh = blockEl(b);
+  el.replaceWith(fresh);
+  const again = fresh.querySelector(`.box[data-line="${n}"]`);
+  if (again) again.focus({ preventScroll: true });
+  afterChange();
+  maybeExplainEdits();
+}
+
+async function copyCode(button) {
+  const b = blockById(button.closest(".block").dataset.id);
+  try {
+    await navigator.clipboard.writeText(codeParts(b.src).body);
+    button.textContent = "Copied";
+    setTimeout(() => { button.textContent = "Copy"; }, 1600);
+  } catch {}
+}
+
+/* ---------- Toolbar, menus, and find ---------- */
+
+let openPop = null;
+
+function placePopover(pop, anchor) {
+  pop.hidden = false;
+  const r = anchor.getBoundingClientRect();
+  const w = pop.offsetWidth;
+  const left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8));
+  pop.style.left = left + "px";
+  pop.style.top = r.bottom + 8 + "px";
+}
+
+function togglePopover(pop, anchor, render) {
+  if (openPop === pop) { closePopovers(); return; }
+  closePopovers();
+  render();
+  placePopover(pop, anchor);
+  anchor.setAttribute("aria-expanded", "true");
+  openPop = pop;
+}
+
+function closePopovers() {
+  if (!openPop) return;
+  openPop.hidden = true;
+  openPop = null;
+  for (const b of document.querySelectorAll("[aria-expanded='true']")) b.setAttribute("aria-expanded", "false");
+}
+
+const STYLES = [
+  ["h1", "Title", "st-title"],
+  ["h2", "Heading", "st-heading"],
+  ["h3", "Subheading", "st-sub"],
+  ["body", "Body", ""],
+  ["quote", "Block Quote", ""],
+  ["codeblock", "Code Block", "st-mono"],
+];
+
+function renderAaMenu() {
+  const on = !!editing;
+  const styles = STYLES.map(([action, label, cls], i) => {
+    const active = on && isActive(action);
+    return `${i === 4 ? '<div class="menu-sep"></div>' : ""}<button type="button" class="menu-item" data-style="${action}"${on ? "" : " disabled"}><span class="check">${active ? "✓" : ""}</span><span class="${cls}">${label}</span></button>`;
+  }).join("");
+  const seg = (key, options) => `<div class="seg" role="group">${options.map(([value, label, cls]) => `<button type="button" data-set="${key}" data-value="${value}" class="${cls || ""}" aria-pressed="${settings[key] === value}">${label}</button>`).join("")}</div>`;
+  const html =
+    `<div class="menu-label">Text style${on ? "" : " <small>· click a block first</small>"}</div>${styles}` +
+    '<div class="menu-sep"></div>' +
+    `<div class="menu-label">Font</div>${seg("face", [["sans", "San Francisco", "f-sans"], ["serif", "New York", "f-serif"], ["mono", "SF Mono", "f-mono"]])}` +
+    `<div class="menu-label">Size</div><div class="stepper"><button type="button" class="small" data-size="-1" aria-label="Smaller text">A</button><output>${settings.size} pt</output><button type="button" class="large" data-size="1" aria-label="Larger text">A</button></div>` +
+    `<div class="menu-label">Page</div>${seg("theme", [["paper", "Paper"], ["default", "Plain"]])}`;
+  // Only touch the DOM when something changed, so a click never lands on a replaced button.
+  if (aaMenu.dataset.html !== html) { aaMenu.innerHTML = html; aaMenu.dataset.html = html; }
+}
+
+aaMenu.addEventListener("click", (e) => {
+  const style = e.target.closest("[data-style]");
+  if (style && editing) { act(style.dataset.style); closePopovers(); return; }
+  const set = e.target.closest("[data-set]");
+  if (set) { settings[set.dataset.set] = set.dataset.value; saveSettings(); renderAaMenu(); return; }
+  const size = e.target.closest("[data-size]");
+  if (size) {
+    settings.size = Math.max(14, Math.min(26, settings.size + +size.dataset.size));
+    saveSettings();
+    renderAaMenu();
+  }
+});
+
+function renderShareMenu() {
+  const dirty = isDirty(cur);
+  const key = isMac ? "⌘" : "Ctrl+";
+  shareMenu.innerHTML =
+    `<button type="button" class="menu-item" data-menu="save"><span>Save as Markdown</span><kbd>${key}S</kbd></button>` +
+    '<button type="button" class="menu-item" data-menu="copy"><span>Copy Markdown</span></button>' +
+    `<button type="button" class="menu-item" data-menu="open"><span>Open a File…</span><kbd>${key}O</kbd></button>` +
+    '<div class="menu-sep"></div>' +
+    `<button type="button" class="menu-item" data-menu="revert"${dirty ? "" : " disabled"}><span>Revert to Original</span></button>` +
+    (cur.builtIn ? "" : '<button type="button" class="menu-item" data-menu="close"><span>Close Document</span></button>');
+}
+
+shareMenu.addEventListener("click", (e) => {
+  const item = e.target.closest("[data-menu]");
+  if (!item || item.disabled) return;
+  closePopovers();
+  const action = item.dataset.menu;
+  if (action === "save") saveDoc();
+  else if (action === "copy") copyMarkdown();
+  else if (action === "open") fileInput.click();
+  else if (action === "revert") revertDoc();
+  else if (action === "close") closeDoc(cur);
+});
+
+document.addEventListener("pointerdown", (e) => {
+  if (!openPop) return;
+  const t = e.target;
+  if (!(t instanceof Element)) return;
+  if (openPop.contains(t) || t.closest("#x-aa, #x-share")) return;
+  closePopovers();
+});
+
+function fileName(doc) { return /\.(md|markdown|mdown|mkd|mkdn|txt|text)$/i.test(doc.name) ? doc.name : doc.name + ".md"; }
+
+function saveDoc() {
+  const text = serialize(cur);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
+  a.download = fileName(cur);
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast(`Saved ${a.download}`);
+}
+
+async function copyMarkdown() {
+  try { await navigator.clipboard.writeText(serialize(cur)); toast("Markdown copied"); } catch { toast("Couldn’t copy. Try Save instead."); }
+}
+
+function revertDoc() {
+  if (editing) { editing = null; root.classList.remove("is-editing"); }
+  cur.blocks = toBlocks(cur.original);
+  renderDoc();
+  toast(`Reverted ${cur.name}`);
+}
+
+let toldAboutEdits = false;
+function maybeExplainEdits() {
+  if (toldAboutEdits || !cur.builtIn || !isDirty(cur)) return;
+  toldAboutEdits = true;
+  toast("Edits stay until you reload.", { label: "Save .md", run: saveDoc });
+}
+
+let toastTimer = 0;
+function toast(message, action) {
+  toastEl.replaceChildren();
+  const span = document.createElement("span");
+  span.textContent = message;
+  toastEl.append(span);
+  if (action) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = action.label;
+    b.addEventListener("click", () => { action.run(); toastEl.classList.remove("show"); });
+    toastEl.append(b);
+  }
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), action ? 7000 : 2400);
+}
+
+function toggleSidebar() {
+  if (compact.matches) { root.classList.toggle("drawer-open"); return; }
+  settings.sidebar = !settings.sidebar;
+  saveSettings();
+}
+function closeDrawer() { root.classList.remove("drawer-open"); }
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-action]");
+  if (!t) return;
+  const action = t.dataset.action;
+  if (action === "sidebar") toggleSidebar();
+  else if (action === "close-drawer") closeDrawer();
+  else if (action === "new") newDoc();
+  else if (action === "open") fileInput.click();
+  else if (action === "aa") togglePopover(aaMenu, t, renderAaMenu);
+  else if (action === "share") togglePopover(shareMenu, t, renderShareMenu);
+  else if (action === "send") sendLink();
+});
+
+for (const b of fmtButtons) b.addEventListener("click", () => act(b.dataset.format));
+
+// A DMG is no use on a phone, so non-Macs get the share sheet (or a copied link) instead.
+async function sendLink() {
+  const url = "https://mdown.sandeepgangarapu.com/";
+  if (typeof navigator.share === "function") {
+    try { await navigator.share({ title: "MDown", text: "MDown, a free Markdown app for Mac", url }); } catch {}
+    return;
+  }
+  try { await navigator.clipboard.writeText(url); toast("Link copied. Open it on your Mac."); } catch {}
+}
+
+/* Find, highlighting every match without touching the page. */
+const canHighlight = typeof CSS !== "undefined" && CSS.highlights && typeof Highlight === "function";
+let matches = [];
+let matchIndex = -1;
+let findTimer = 0;
+
+function runFind() {
+  const q = findInput.value;
+  matches = [];
+  matchIndex = -1;
+  if (canHighlight) { CSS.highlights.delete("find"); CSS.highlights.delete("find-current"); }
+  if (!q) { findCount.textContent = ""; return; }
+  if (editing) commit();
+  const needle = q.toLowerCase();
+  const walker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.parentElement.closest("[data-skip], .editor, .hb") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  });
+  let n;
+  while ((n = walker.nextNode())) {
+    const hay = n.data.toLowerCase();
+    if (hay.length !== n.data.length) continue;
+    for (let i = hay.indexOf(needle); i >= 0; i = hay.indexOf(needle, i + needle.length)) {
+      const r = new Range();
+      r.setStart(n, i);
+      r.setEnd(n, i + needle.length);
+      matches.push(r);
+    }
+  }
+  if (canHighlight && matches.length) CSS.highlights.set("find", new Highlight(...matches));
+  if (matches.length) gotoMatch(0);
+  else findCount.textContent = "0";
+}
+
+function gotoMatch(i) {
+  if (!matches.length) return;
+  matchIndex = (i + matches.length) % matches.length;
+  const r = matches[matchIndex];
+  if (canHighlight) CSS.highlights.set("find-current", new Highlight(r));
+  findCount.textContent = `${matchIndex + 1}/${matches.length}`;
+  const rect = r.getBoundingClientRect();
+  if (rect.top < toolbar.offsetHeight + 20 || rect.bottom > innerHeight - 20) {
+    scrollBy({ top: rect.top - innerHeight * 0.35, behavior: reduceMotion.matches ? "auto" : "smooth" });
+  }
+}
+
+function clearFind() {
+  if (findInput.value) { findInput.value = ""; runFind(); }
+  if (document.activeElement !== findInput) root.classList.remove("finding");
+}
+
+findInput.addEventListener("input", () => { clearTimeout(findTimer); findTimer = setTimeout(runFind, 90); });
+findInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); clearTimeout(findTimer); if (matchIndex < 0) runFind(); else gotoMatch(matchIndex + (e.shiftKey ? -1 : 1)); }
+  else if (e.key === "Escape") { e.preventDefault(); findInput.value = ""; runFind(); findInput.blur(); }
+});
+findInput.addEventListener("focus", () => root.classList.add("finding"));
+findInput.addEventListener("blur", () => { if (!findInput.value) root.classList.remove("finding"); });
+
+function openFind() {
+  if (getComputedStyle($("#x-find")).display === "none") return;
+  findInput.focus();
+  findInput.select();
+}
+
+/* Keyboard shortcuts for the whole window. */
+document.addEventListener("keydown", (e) => {
+  const mod = isMac ? e.metaKey : e.ctrlKey;
+  if (e.key === "Escape" && openPop) { e.preventDefault(); e.stopPropagation(); closePopovers(); return; }
+  if (e.key === "Escape" && root.classList.contains("drawer-open")) { closeDrawer(); return; }
+  if (e.ctrlKey && e.metaKey && e.key.toLowerCase() === "s") { e.preventDefault(); toggleSidebar(); return; }
+  if (!mod || e.altKey || e.shiftKey) return;
+  const k = e.key.toLowerCase();
+  if (k === "f") { e.preventDefault(); openFind(); }
+  else if (k === "s") { e.preventDefault(); saveDoc(); }
+  else if (k === "o") { e.preventDefault(); fileInput.click(); }
+}, true);
+
+/* ---------- Opening your own files ---------- */
+
+function uniqueName(name) {
+  let candidate = name, n = 1;
+  const dot = name.lastIndexOf(".");
+  const stem = dot > 0 ? name.slice(0, dot) : name;
+  const ext = dot > 0 ? name.slice(dot) : "";
+  while (docs.some((d) => d.name === candidate)) candidate = `${stem} ${++n}${ext}`;
+  return candidate;
+}
+
+async function openFiles(list) {
+  const files = [...list].slice(0, 12);
+  let first = null, skipped = 0;
+  for (const f of files) {
+    const looksRight = /\.(md|markdown|mdown|mkd|mkdn|txt|text)$/i.test(f.name) || (f.type && f.type.startsWith("text/"));
+    if (!looksRight || f.size > 5e6) { skipped++; continue; }
+    try {
+      const text = (await f.text()).replace(/\r\n?/g, "\n");
+      const doc = makeDoc(uniqueName(f.name), text);
+      first = first || doc;
+    } catch { skipped++; }
+  }
+  if (first) switchDoc(first);
+  if (skipped) toast(first ? "Some files weren’t Markdown, so MDown skipped them." : "MDown opens Markdown and text files.");
+}
+
+fileInput.addEventListener("change", () => { if (fileInput.files.length) openFiles(fileInput.files); fileInput.value = ""; });
+
+let dragDepth = 0;
+const hasFiles = (e) => e.dataTransfer && [...e.dataTransfer.types].includes("Files");
+addEventListener("dragenter", (e) => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; root.classList.add("dropping"); });
+addEventListener("dragover", (e) => { if (!hasFiles(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = "copy"; });
+addEventListener("dragleave", (e) => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) root.classList.remove("dropping"); });
+addEventListener("drop", (e) => {
+  if (!hasFiles(e)) return;
+  e.preventDefault();
+  dragDepth = 0;
+  root.classList.remove("dropping");
+  openFiles(e.dataTransfer.files);
+});
+
+/* ---------- Start ---------- */
+
+for (const pre of document.querySelectorAll(".md-source")) {
+  makeDoc(pre.dataset.name, pre.textContent.replace(/\n$/, ""), { builtIn: true, hash: pre.dataset.hash || "" });
+}
+cur = docs[0];
+renderDoc();
+
+const ALIASES = {
+  download: ["MDown.md", "get-mdown"],
+  try: ["MDown.md", null],
+  "first-launch": ["First launch.md", null],
+  about: ["About.md", null],
+};
+function route() {
+  const hash = decodeSafe(location.hash.slice(1));
+  if (!hash) return;
+  const alias = ALIASES[hash];
+  if (alias) {
+    const d = docs.find((x) => x.name === alias[0]);
+    if (d && d !== cur) switchDoc(d);
+    if (alias[1]) requestAnimationFrame(() => scrollToId(alias[1]));
+    return;
+  }
+  scrollToId(hash);
+}
+addEventListener("hashchange", route);
+route();
+
+/* Keep the built-in pages' facts current: version and size from the update feed, stars from GitHub. */
+function replaceInDocs(from, to) {
+  for (const d of docs) {
+    if (!d.builtIn || !d.original.includes(from)) continue;
+    d.original = d.original.split(from).join(to);
+    d.norm = normalize(d.original);
+    for (const b of d.blocks) {
+      if (!b.src.includes(from) || (editing && d === cur && editing.id === b.id)) continue;
+      b.src = b.src.split(from).join(to);
+      if (d === cur) { const el = elById(b.id); if (el) el.replaceWith(blockEl(b)); }
+    }
+  }
+  if (cur) afterChange();
+}
+
 (async () => {
   try {
     const response = await fetch("appcast.xml", { cache: "no-cache" });
@@ -652,234 +2514,18 @@
     const ns = "http://www.andymatuschak.org/xml-namespaces/sparkle";
     const version = item.getElementsByTagNameNS(ns, "shortVersionString")[0]?.textContent?.trim();
     const bytes = Number(item.querySelector("enclosure")?.getAttribute("length") || 0);
-    if (version && bytes) {
-      const mb = Math.max(1, Math.round(bytes / 1e6));
-      document.querySelectorAll("[data-release-line]").forEach((node) => {
-        node.textContent = `MDown ${version} · ${mb} MB · macOS 26+`;
-      });
-    }
+    if (version && bytes) replaceInDocs("MDown 1.1.2 · 4 MB · macOS 26+", `MDown ${version} · ${Math.max(1, Math.round(bytes / 1e6))} MB · macOS 26+`);
   } catch {}
 })();
 
-// Show the GitHub star count once there are enough stars to mean something.
 (async () => {
   try {
     const response = await fetch("https://api.github.com/repos/sandeepgangarapu/mdown");
     if (!response.ok) return;
     const { stargazers_count: stars } = await response.json();
-    if (stars >= 10) {
-      document.querySelectorAll("[data-stars]").forEach((node) => {
-        node.textContent = `  ★ ${stars.toLocaleString()}`;
-        node.hidden = false;
-      });
-    }
+    if (stars >= 10) replaceInDocs("[View source](", `[View source ★ ${stars.toLocaleString()}](`);
   } catch {}
 })();
-
-// Copy buttons on the command snippets copy just the command, without the prompt.
-document.querySelectorAll("[data-copy]").forEach((button) => {
-  button.addEventListener("click", async () => {
-    const command = button.parentElement.querySelector("code").textContent;
-    try {
-      await navigator.clipboard.writeText(command);
-      button.textContent = "Copied";
-      setTimeout(() => { button.textContent = "Copy"; }, 1600);
-    } catch {}
-  });
-});
-
-// On phones and other non-Mac devices, offer to send the link instead of a download.
-document.querySelectorAll("[data-share]").forEach((button) => {
-  const canShare = typeof navigator.share === "function";
-  button.textContent = canShare ? "Send link to my Mac" : "Copy link";
-  button.addEventListener("click", async () => {
-    const url = "https://mdown.sandeepgangarapu.com/";
-    if (canShare) {
-      try { await navigator.share({ title: "MDown", text: "MDown, a free Markdown editor for Mac", url }); } catch {}
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      button.textContent = "Link copied";
-      setTimeout(() => { button.textContent = "Copy link"; }, 2000);
-    } catch {}
-  });
-});
-
-(() => {
-  const blocks = [
-    "# Weekly summary prompt",
-    "Summarize the week’s merged pull requests for the team channel. Keep it under **150 words** and mention the `release` branch.",
-    "- [x] Group changes by area\n- [ ] Link each pull request\n- [ ] Call out anything *risky*",
-    "> Write for people who missed standup, not for the authors."
-  ];
-  const page = document.getElementById("demo");
-  let open = -1;
-
-  const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-  const inline = (text) => escape(text)
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>")
-    .replace(/~~([^~]+)~~/g, "<s>$1</s>")
-    .replace(/\[([^\]]+)\]\(([^)]*)\)/g, '<span style="color:var(--accent)">$1</span>');
-
-  const taskPattern = /^(\s*[-*+]\s+\[)([ xX])(\]\s+.*)$/;
-
-  const render = (md) => {
-    let task = 0;
-    const out = [];
-    let paragraph = [];
-    let list = [];
-    let quote = [];
-    const flush = () => {
-      if (paragraph.length) { out.push(`<p>${inline(paragraph.join(" "))}</p>`); paragraph = []; }
-      if (list.length) { out.push(`<ul>${list.join("")}</ul>`); list = []; }
-      if (quote.length) { out.push(`<blockquote><p>${inline(quote.join(" "))}</p></blockquote>`); quote = []; }
-    };
-    for (const line of md.split("\n")) {
-      let m;
-      if (!line.trim()) { flush(); continue; }
-      if ((m = line.match(/^#{1,6}\s+(.*)$/))) { flush(); out.push(`<h3>${inline(m[1])}</h3>`); continue; }
-      if ((m = line.match(/^>\s?(.*)$/))) { if (paragraph.length || list.length) flush(); quote.push(m[1]); continue; }
-      if ((m = line.match(/^\s*[-*+]\s+\[([ xX])\]\s+(.*)$/))) {
-        if (paragraph.length || quote.length) flush();
-        const done = m[1] !== " ";
-        const label = escape(m[2]);
-        list.push(`<li class="${done ? "done" : ""}"><button type="button" class="box${done ? " done" : ""}" data-task="${task++}" role="checkbox" aria-checked="${done}" aria-label="${label}"></button><span>${inline(m[2])}</span></li>`);
-        continue;
-      }
-      if ((m = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(.*)$/))) {
-        if (paragraph.length || quote.length) flush();
-        list.push(`<li><span class="bullet" aria-hidden="true">•</span><span>${inline(m[1])}</span></li>`);
-        continue;
-      }
-      if (list.length || quote.length) flush();
-      paragraph.push(line.trim());
-    }
-    flush();
-    return out.join("");
-  };
-
-  // The source view: the same text, with the Markdown syntax dimmed.
-  const highlight = (md) => {
-    const lines = md.split("\n").map((line) => {
-      let html = escape(line);
-      const lead = html.match(/^(\s*(?:#{1,6}\s+|&gt;\s?|[-*+]\s+\[[ xX]\]\s+|[-*+]\s+|\d+[.)]\s+))/);
-      let prefix = "";
-      if (lead) { prefix = `<span class="mk">${lead[1]}</span>`; html = html.slice(lead[1].length); }
-      html = html
-        .replace(/`([^`]*)`/g, '<span class="mk">`</span>$1<span class="mk">`</span>')
-        .replace(/\[([^\]]*)\]\(([^)]*)\)/g, '<span class="mk">[</span>$1<span class="mk">]($2)</span>')
-        .replace(/(\*\*|~~)/g, '<span class="mk">$1</span>')
-        .replace(/(^|[^*>])\*(?!\*)/g, '$1<span class="mk">*</span>');
-      return prefix + html;
-    });
-    let html = lines.join("\n");
-    if (md.endsWith("\n") || md === "") html += " ";
-    return html;
-  };
-
-  const draw = () => {
-    page.replaceChildren();
-    blocks.forEach((md, index) => {
-      const block = document.createElement("div");
-      block.className = "block";
-      if (index === open) {
-        block.classList.add("editing");
-        const editor = document.createElement("div");
-        editor.className = "editor" + (/^#{1,6}\s/.test(md) ? " heading" : "");
-        const mirror = document.createElement("div");
-        mirror.className = "mirror";
-        mirror.setAttribute("aria-hidden", "true");
-        mirror.innerHTML = highlight(md);
-        const field = document.createElement("textarea");
-        field.value = md;
-        field.spellcheck = false;
-        field.setAttribute("aria-label", "Markdown source for this block");
-        field.addEventListener("input", () => {
-          blocks[index] = field.value;
-          mirror.innerHTML = highlight(field.value);
-          editor.className = "editor" + (/^#{1,6}\s/.test(field.value) ? " heading" : "");
-        });
-        field.addEventListener("keydown", (event) => {
-          if (event.key === "Escape") { event.preventDefault(); finish(index); }
-        });
-        editor.append(mirror, field);
-        block.append(editor);
-        page.append(block);
-        requestAnimationFrame(() => {
-          field.focus();
-          field.setSelectionRange(field.value.length, field.value.length);
-        });
-      } else {
-        block.innerHTML = render(md);
-        block.tabIndex = 0;
-        const hasTasks = block.querySelector(".box") !== null;
-        if (!hasTasks) block.setAttribute("role", "button");
-        block.setAttribute("aria-label", "Edit this block: " + block.textContent.trim());
-        block.addEventListener("click", (event) => {
-          const box = event.target.closest(".box");
-          if (box) {
-            event.stopPropagation();
-            toggleTask(index, Number(box.dataset.task));
-            return;
-          }
-          edit(index);
-        });
-        block.addEventListener("keydown", (event) => {
-          if (event.target !== block) return;
-          if (event.key === "Enter" || event.key === " ") { event.preventDefault(); edit(index); }
-        });
-        page.append(block);
-      }
-    });
-  };
-
-  // Flips the n-th task box in a block, the way clicking a circle in MDown does.
-  const toggleTask = (index, n) => {
-    let seen = -1;
-    blocks[index] = blocks[index].split("\n").map((line) => {
-      const m = line.match(taskPattern);
-      if (!m || ++seen !== n) return line;
-      return m[1] + (m[2] === " " ? "x" : " ") + m[3];
-    }).join("\n");
-    draw();
-    page.children[index]?.querySelectorAll(".box")[n]?.focus();
-  };
-
-  const tidy = () => {
-    for (let i = blocks.length - 1; i >= 0; i--) if (!blocks[i].trim()) blocks.splice(i, 1);
-    if (!blocks.length) blocks.push("Start writing");
-  };
-
-  const edit = (index) => {
-    if (open === index) return;
-    const target = blocks[index];
-    open = -1;
-    tidy();
-    open = blocks.indexOf(target);
-    draw();
-  };
-
-  const finish = (index) => {
-    const text = blocks[index];
-    open = -1;
-    tidy();
-    draw();
-    const position = blocks.indexOf(text);
-    if (position >= 0) page.children[position]?.focus();
-  };
-
-  document.addEventListener("pointerdown", (event) => {
-    if (open >= 0 && !event.target.closest(".block.editing")) {
-      const inside = event.target.closest("#demo .block");
-      if (!inside) { open = -1; tidy(); draw(); }
-    }
-  });
-
-  draw();
 })();
 </script>
 </body>
