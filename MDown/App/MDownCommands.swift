@@ -7,7 +7,6 @@ struct MDownCommands: Commands {
     @FocusedValue(\.editorFind) private var find
     @AppStorage(MDownSettings.fontSize) private var fontSize = MDownSettings.defaultFontSize
     @AppStorage(MDownSettings.showWordCount) private var showWordCount = false
-    @Environment(\.newDocument) private var newDocument
 
     var body: some Commands {
         SidebarCommands()
@@ -64,7 +63,7 @@ struct MDownCommands: Commands {
 
         CommandGroup(replacing: .help) {
             Button("MDown Guide") {
-                newDocument(MarkdownDocument(text: WelcomeMarkdown.text))
+                Guide.open()
             }
             Link("Markdown Syntax", destination: URL(string: "https://commonmark.org/help/")!)
         }

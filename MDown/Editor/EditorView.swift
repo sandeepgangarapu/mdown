@@ -152,6 +152,7 @@ struct EditorView: View {
                             .onTapGesture { finishEditing() }
                     }
                 }
+                .defaultScrollAnchor(.top)
                 .scrollEdgeEffectStyle(.soft, for: .top)
                 .onScrollTargetVisibilityChange(idType: PageRowID.self, threshold: 0.01) { ids in
                     tracker.topVisibleLocation = topLocation(of: ids)
