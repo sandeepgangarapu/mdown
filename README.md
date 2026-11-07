@@ -36,8 +36,7 @@ Prompts, agent briefs, specs, and model output are all Markdown. The editors aro
 Or install it with [Homebrew](https://brew.sh):
 
 ```sh
-brew trust sandeepgangarapu/tap
-brew install --cask sandeepgangarapu/tap/mdown
+brew trust sandeepgangarapu/tap && brew install --cask sandeepgangarapu/tap/mdown
 ```
 
 MDown needs macOS 26 or later and runs natively on Apple silicon and Intel. Once installed, it checks for new versions and updates itself.
