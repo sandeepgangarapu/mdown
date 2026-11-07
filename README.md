@@ -61,6 +61,26 @@ Build the DMG (needs `pip install dmgbuild`):
 Packaging/make-dmg.sh
 ```
 
+Prepare a Sparkle-signed release and prepend its appcast entry (no publication):
+
+```sh
+Packaging/release.sh 1.1.0 "Release notes (Markdown or HTML)"
+```
+
+This increments the build number and updates the project version. The EdDSA key
+must be at `~/.config/mdown/sparkle_ed25519_private.key`. Install `cmark` (`brew install cmark`) for
+Markdown and HTML release notes. Review the DMG,
+project version, and `docs/appcast.xml` before publishing. From a clean checkout,
+`Packaging/release.sh --publish 1.1.0 "Notes"` also commits, rebases, pushes, and
+creates the GitHub release. Run either preparation or publication for a version,
+not both. The asset name remains `MDown.dmg`.
+
+Build intermediates stay in temporary storage. Override `DERIVED_DATA_PATH`,
+`DMG_OUTPUT`, or `DMGBUILD` to select a scratch directory or a venv's `dmgbuild`.
+Packaging verifies the app's nested signatures again inside the finished DMG.
+Sparkle's shipped ad-hoc helper signatures are preserved; update archives are
+authenticated separately by EdDSA. No Developer ID or notarization is required.
+
 ## Project layout
 
 | Folder | What's in it |

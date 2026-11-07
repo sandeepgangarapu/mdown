@@ -30,4 +30,5 @@ icon_locations = {
     "MDown.app": (160, 205),
     "Applications": (480, 205),
 }
-hide_extensions = ["MDown.app"]
+# Do not set hide_extensions: dmgbuild writes com.apple.FinderInfo onto the
+# signed app bundle, which makes codesign --verify --deep --strict fail.

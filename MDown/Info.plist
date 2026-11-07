@@ -46,5 +46,13 @@
 	<string>NSApplication</string>
 	<key>NSQuitAlwaysKeepsWindows</key>
 	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/sandeepgangarapu/mdown/main/docs/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>95w4+iwjixz6HLv9gb/qXy810dHNF6MsaBERGWsVrCw=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>

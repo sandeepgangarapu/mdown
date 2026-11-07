@@ -9,6 +9,11 @@ struct MDownCommands: Commands {
     @AppStorage(MDownSettings.showWordCount) private var showWordCount = false
 
     var body: some Commands {
+        CommandGroup(after: .appInfo) {
+            Button("Check for Updates…") { AppUpdater.shared.checkForUpdates() }
+                .disabled(!AppUpdater.shared.canCheckForUpdates)
+        }
+
         SidebarCommands()
         ToolbarCommands()
 

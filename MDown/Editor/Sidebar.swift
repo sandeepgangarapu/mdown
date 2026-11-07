@@ -111,6 +111,7 @@ struct Sidebar: View {
                 .buttonStyle(.borderless)
                 .help("New Document")
                 Spacer()
+                UpdateButton()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)

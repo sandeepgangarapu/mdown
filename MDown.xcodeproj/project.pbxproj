@@ -22,6 +22,8 @@
 		F00000000000000000000043 /* OpenDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000042 /* OpenDocuments.swift */; };
 		F00000000000000000000045 /* FormatToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000044 /* FormatToolbar.swift */; };
 		F0000000000000000000004B /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000004A /* Typography.swift */; };
+		F00000000000000000000052 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = F00000000000000000000051 /* Sparkle */; };
+		F00000000000000000000054 /* AppUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000053 /* AppUpdater.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +43,7 @@
 		F00000000000000000000042 /* OpenDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenDocuments.swift; sourceTree = "<group>"; };
 		F00000000000000000000044 /* FormatToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatToolbar.swift; sourceTree = "<group>"; };
 		F0000000000000000000004A /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		F00000000000000000000053 /* AppUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdater.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +52,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0000000000000000000002A /* MDownCore in Frameworks */,
+				F00000000000000000000052 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,6 +62,7 @@
 		F00000000000000000000011 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				F00000000000000000000053 /* AppUpdater.swift */,
 				F00000000000000000000042 /* OpenDocuments.swift */,
 				F00000000000000000000040 /* MDownCommands.swift */,
 				F00000000000000000000001 /* MDownApp.swift */,
@@ -151,6 +156,7 @@
 			name = MDown;
 			packageProductDependencies = (
 				F00000000000000000000029 /* MDownCore */,
+				F00000000000000000000051 /* Sparkle */,
 			);
 			productName = MDown;
 			productReference = F00000000000000000000019 /* MDown.app */;
@@ -183,6 +189,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				F00000000000000000000028 /* XCLocalSwiftPackageReference "MDownCore" */,
+				F00000000000000000000050 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 63;
 			productRefGroup = F00000000000000000000018 /* Products */;
@@ -210,6 +217,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F00000000000000000000054 /* AppUpdater.swift in Sources */,
 				F0000000000000000000004B /* Typography.swift in Sources */,
 				F00000000000000000000045 /* FormatToolbar.swift in Sources */,
 				F00000000000000000000043 /* OpenDocuments.swift in Sources */,
@@ -430,11 +438,27 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		F00000000000000000000050 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		F00000000000000000000029 /* MDownCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = F00000000000000000000028 /* XCLocalSwiftPackageReference "MDownCore" */;
 			productName = MDownCore;
+		};
+		F00000000000000000000051 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F00000000000000000000050 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 

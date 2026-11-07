@@ -29,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppUpdater.shared.start()
         guard !Guide.hasBeenShown else { return }
         Guide.hasBeenShown = true
         DispatchQueue.main.async {
