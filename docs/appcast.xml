@@ -1,6 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <channel>
+<?xml version="1.0" ?><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel><item><title>MDown 1.1</title><pubDate>Sat, 07 Nov 2026 03:30:07 GMT</pubDate><sparkle:version>3</sparkle:version><sparkle:shortVersionString>1.1</sparkle:shortVersionString><sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion><description><![CDATA[<ul>
+<li><strong>MDown now updates itself.</strong> It checks once a day, and you can check any time from MDown &gt; Check for Updates… or with the button beside New Document in the sidebar.</li>
+<li>When a new version is ready, that button turns into an orange arrow. Click it to see what's new and install.</li>
+</ul>
+]]></description><enclosure url="https://github.com/sandeepgangarapu/mdown/releases/download/v1.1/MDown.dmg" length="3974949" type="application/octet-stream" sparkle:edSignature="f0/RiD2xmfStAd0Hsy9nH39W3GYICaVgxp0cP5Flx3c0TO2wgOHijfurJpqlQjRs1GlNzp94mSIbjKSVzZJdAg=="/></item>
     <title>MDown</title>
     <link>https://mdown.sandeepgangarapu.com/</link>
     <description>Updates for MDown, the simplest and cleanest Markdown editor.</description>
