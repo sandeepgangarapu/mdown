@@ -661,6 +661,7 @@ We read Markdown more than we edit it. MDown opens it instantly as a clean page,
 - Opens Markdown instantly, as a clean page.
 - Click any block to edit the Markdown behind it. Click away to read.
 - Lists every open file, and its headings, in the sidebar.
+- Shows the other Markdown files in the folder, so you can read through them without going back to Finder.
 - Works with plain `.md` files. No accounts, sync, or vaults.
 - Keeps your words on your Mac. Only update checks and linked images go online.
 
@@ -672,7 +673,7 @@ MDown isn’t trying to be the most powerful Markdown editor. It’s trying to b
 
 [Download MDown.dmg](https://github.com/sandeepgangarapu/mdown/releases/latest/download/MDown.dmg) [All releases](https://github.com/sandeepgangarapu/mdown/releases)
 
-MDown 1.1.2 · 4 MB · macOS 26+ · Apple silicon and Intel · Updates itself
+4 MB · macOS 26+ · Apple silicon and Intel · Updates itself
 
 Or install it with Homebrew:
 
@@ -2489,7 +2490,7 @@ function route() {
 addEventListener("hashchange", route);
 route();
 
-/* Keep the built-in pages' facts current: version and size from the update feed, stars from GitHub. */
+/* Keep the built-in pages' facts current: download size from the update feed, stars from GitHub. */
 function replaceInDocs(from, to) {
   for (const d of docs) {
     if (!d.builtIn || !d.original.includes(from)) continue;
@@ -2511,11 +2512,9 @@ function replaceInDocs(from, to) {
     const xml = new DOMParser().parseFromString(await response.text(), "application/xml");
     const item = xml.querySelector("item");
     if (!item) return;
-    const ns = "http://www.andymatuschak.org/xml-namespaces/sparkle";
-    const version = item.getElementsByTagNameNS(ns, "shortVersionString")[0]?.textContent?.trim();
     const bytes = Number(item.querySelector("enclosure")?.getAttribute("length") || 0);
-    const line = docs[0].original.match(/MDown [\d.]+ · \d+ MB · macOS 26\+/);
-    if (version && bytes && line) replaceInDocs(line[0], `MDown ${version} · ${Math.max(1, Math.round(bytes / 1e6))} MB · macOS 26+`);
+    const line = docs[0].original.match(/\d+ MB · macOS 26\+/);
+    if (bytes && line) replaceInDocs(line[0], `${Math.max(1, Math.round(bytes / 1e6))} MB · macOS 26+`);
   } catch {}
 })();
 
