@@ -6,6 +6,10 @@ struct SettingsView: View {
     @AppStorage(MDownSettings.face) private var face: PageFace = MDownSettings.defaultFace
     @AppStorage(MDownSettings.theme) private var theme: PageTheme = MDownSettings.defaultTheme
     @AppStorage(MDownSettings.showWordCount) private var showWordCount = false
+    @AppStorage(MDownSettings.sidebarShowsOpen) private var showsOpen = true
+    @AppStorage(MDownSettings.sidebarShowsContents) private var showsContents = true
+    @AppStorage(MDownSettings.sidebarShowsFolder) private var showsFolder = true
+    @AppStorage(MDownSettings.sidebarShowsRecent) private var showsRecent = true
     @Environment(\.colorScheme) private var colorScheme
 
     private static let sample = MarkdownRenderModel.sourcedBlocks(from: """
@@ -53,6 +57,25 @@ struct SettingsView: View {
                 Toggle("Show word count in the title bar", isOn: $showWordCount)
             }
 
+            Section("Sidebar") {
+                Toggle(isOn: $showsOpen) {
+                    Text("Open")
+                    Text("Every file you have open")
+                }
+                Toggle(isOn: $showsContents) {
+                    Text("Contents")
+                    Text("This file's headings")
+                }
+                Toggle(isOn: $showsFolder) {
+                    Text("Folder")
+                    Text("The files and folders around this one")
+                }
+                Toggle(isOn: $showsRecent) {
+                    Text("Recent")
+                    Text("Files you opened before")
+                }
+            }
+
             HStack {
                 Spacer()
                 Button("Restore Defaults") {
@@ -60,6 +83,10 @@ struct SettingsView: View {
                     face = MDownSettings.defaultFace
                     theme = MDownSettings.defaultTheme
                     showWordCount = false
+                    showsOpen = true
+                    showsContents = true
+                    showsFolder = true
+                    showsRecent = true
                 }
             }
         }

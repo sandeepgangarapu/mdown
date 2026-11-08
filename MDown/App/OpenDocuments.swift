@@ -13,6 +13,9 @@ final class OpenDocuments {
         let id: UUID
         var fileURL: URL?
         var untitledName: String
+        /// Documents opened in each other's place share a stack: one spot on screen, with any of
+        /// them in front.
+        var stack: UUID
         weak var window: NSWindow?
 
         var title: String {
@@ -24,13 +27,17 @@ final class OpenDocuments {
 
         static func == (lhs: Entry, rhs: Entry) -> Bool {
             lhs.id == rhs.id && lhs.fileURL == rhs.fileURL && lhs.untitledName == rhs.untitledName
-                && lhs.window === rhs.window
+                && lhs.stack == rhs.stack && lhs.window === rhs.window
         }
     }
 
     private(set) var entries: [Entry] = []
     private(set) var recentURLs: [URL] = []
     @ObservationIgnored private var titleObservations: [UUID: NSKeyValueObservation] = [:]
+    /// The stack a file joins when it opens in another window's spot.
+    @ObservationIgnored private var pendingStacks: [URL: UUID] = [:]
+    /// Files on their way to a window, so a second click doesn't open one twice.
+    @ObservationIgnored private var opening: Set<URL> = []
 
     private init() {
         refreshRecents()
@@ -43,7 +50,8 @@ final class OpenDocuments {
             entries[index].fileURL = fileURL
             entries[index].untitledName = name
         } else {
-            entries.append(Entry(id: id, fileURL: fileURL, untitledName: name, window: window))
+            let stack = fileURL.flatMap { pendingStacks.removeValue(forKey: $0.standardizedFileURL) } ?? id
+            entries.append(Entry(id: id, fileURL: fileURL, untitledName: name, stack: stack, window: window))
         }
         titleObservations[id] = window.observe(\.title, options: [.new]) { window, _ in
             MainActor.assumeIsolated {
@@ -76,16 +84,72 @@ final class OpenDocuments {
         refreshRecents()
     }
 
-    func focus(id: UUID) {
-        guard let window = entries.first(where: { $0.id == id })?.window else { return }
+    /// Brings document `id` forward. When it shares a stack with document `current`, it comes
+    /// forward in that window's spot, so switching files reads as one window.
+    func focus(id: UUID, over current: UUID? = nil) {
+        guard let entry = entries.first(where: { $0.id == id }), let window = entry.window else { return }
         if window.isMiniaturized {
             window.deminiaturize(nil)
+        }
+        if let front = entries.first(where: { $0.id == current && $0.id != id && $0.stack == entry.stack }),
+           let frontWindow = front.window,
+           !frontWindow.styleMask.contains(.fullScreen), !window.styleMask.contains(.fullScreen) {
+            window.setFrame(frontWindow.frame, display: false)
         }
         window.makeKeyAndOrderFront(nil)
     }
 
     func close(id: UUID) {
         entries.first(where: { $0.id == id })?.window?.performClose(nil)
+    }
+
+    /// Shows `url` in the spot of document `id`'s window, or in a new window when `id` is nil. The
+    /// file that was there stays open behind it, and in Open, until it's closed. A file that's
+    /// already open comes forward instead.
+    func open(_ url: URL, over id: UUID?) {
+        let target = url.standardizedFileURL
+        if let entry = entries.first(where: { $0.fileURL?.standardizedFileURL == target }) {
+            focus(id: entry.id, over: id)
+            return
+        }
+        guard opening.insert(target).inserted else { return }
+        let front = entries.first { $0.id == id }
+        if let front {
+            pendingStacks[target] = front.stack
+        }
+        Task {
+            defer { opening.remove(target) }
+            do {
+                let (document, alreadyOpen) = try await NSDocumentController.shared.openDocument(withContentsOf: url, display: false)
+                if document.windowControllers.isEmpty {
+                    document.makeWindowControllers()
+                }
+                if !alreadyOpen, let frontWindow = front?.window, let window = document.windowControllers.first?.window {
+                    show(document, in: window, over: frontWindow)
+                } else {
+                    pendingStacks[target] = nil
+                    document.showWindows()
+                }
+            } catch {
+                pendingStacks[target] = nil
+                NSApp.presentError(error)
+            }
+        }
+    }
+
+    /// Shows a new document's window exactly over `front`, so it reads as the same window showing
+    /// another file.
+    private func show(_ document: NSDocument, in window: NSWindow, over front: NSWindow) {
+        let frame = front.frame
+        let animation = window.animationBehavior
+        window.animationBehavior = .none
+        window.setFrame(frame, display: false)
+        if front.styleMask.contains(.fullScreen) || (front.tabbedWindows?.count ?? 0) > 1 {
+            front.addTabbedWindow(window, ordered: .above)
+        }
+        document.showWindows()
+        window.setFrame(frame, display: true)
+        window.animationBehavior = animation
     }
 
     func refreshRecents() {

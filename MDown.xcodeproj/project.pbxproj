@@ -11,6 +11,7 @@
 		F00000000000000000000004 /* MarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* MarkdownDocument.swift */; };
 		F00000000000000000000006 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000005 /* EditorView.swift */; };
 		F0000000000000000000002E /* Sidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000002D /* Sidebar.swift */; };
+		F00000000000000000000058 /* FolderBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000057 /* FolderBrowser.swift */; };
 		F0000000000000000000000A /* InlineContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000009 /* InlineContent.swift */; };
 		F0000000000000000000000C /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000B /* PageView.swift */; };
 		F0000000000000000000002C /* InlineBlockEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000002B /* InlineBlockEditor.swift */; };
@@ -35,6 +36,7 @@
 		F00000000000000000000003 /* MarkdownDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocument.swift; sourceTree = "<group>"; };
 		F00000000000000000000005 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		F0000000000000000000002D /* Sidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
+		F00000000000000000000057 /* FolderBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderBrowser.swift; sourceTree = "<group>"; };
 		F00000000000000000000009 /* InlineContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineContent.swift; sourceTree = "<group>"; };
 		F0000000000000000000000B /* PageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageView.swift; sourceTree = "<group>"; };
 		F0000000000000000000002B /* InlineBlockEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineBlockEditor.swift; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 			children = (
 				F00000000000000000000044 /* FormatToolbar.swift */,
 				F0000000000000000000002D /* Sidebar.swift */,
+				F00000000000000000000057 /* FolderBrowser.swift */,
 				F00000000000000000000005 /* EditorView.swift */,
 			);
 			path = Editor;
@@ -229,6 +232,7 @@
 				F00000000000000000000002 /* MDownApp.swift in Sources */,
 				F00000000000000000000004 /* MarkdownDocument.swift in Sources */,
 				F0000000000000000000002E /* Sidebar.swift in Sources */,
+				F00000000000000000000058 /* FolderBrowser.swift in Sources */,
 				F00000000000000000000006 /* EditorView.swift in Sources */,
 				F0000000000000000000000A /* InlineContent.swift in Sources */,
 				F0000000000000000000002C /* InlineBlockEditor.swift in Sources */,

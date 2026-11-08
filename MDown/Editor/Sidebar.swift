@@ -17,22 +17,30 @@ final class PageTracker {
 private enum SidebarItem: Hashable {
     case document(UUID)
     case heading(Int)
+    case folder(URL)
+    case file(URL)
     case recent(URL)
 }
 
-/// The window's sidebar: every open document, the current document's headings, and recent files,
-/// each in a collapsible section.
+/// The window's sidebar: every open document, the current document's headings, the files in its
+/// folder, and recent files, each in a collapsible section.
 struct Sidebar: View {
     var documentID: UUID
+    var fileURL: URL?
+    var folder: FolderBrowser
     var outline: [OutlineEntry]
     var tracker: PageTracker
     var editingLocation: Int?
     var onSelectHeading: (OutlineEntry) -> Void
 
-    @Environment(\.openDocument) private var openDocument
     @Environment(\.newDocument) private var newDocument
+    @AppStorage(MDownSettings.sidebarShowsOpen) private var showsOpen = true
+    @AppStorage(MDownSettings.sidebarShowsContents) private var showsContents = true
+    @AppStorage(MDownSettings.sidebarShowsFolder) private var showsFolder = true
+    @AppStorage(MDownSettings.sidebarShowsRecent) private var showsRecent = true
     @AppStorage(MDownSettings.sidebarOpenExpanded) private var openExpanded = true
     @AppStorage(MDownSettings.sidebarContentsExpanded) private var contentsExpanded = true
+    @AppStorage(MDownSettings.sidebarFolderExpanded) private var folderExpanded = true
     @AppStorage(MDownSettings.sidebarRecentExpanded) private var recentExpanded = true
     @State private var selection: SidebarItem?
 
@@ -41,44 +49,58 @@ struct Sidebar: View {
     var body: some View {
         let current = currentHeading
         List(selection: $selection) {
-            Section(isExpanded: $openExpanded) {
-                ForEach(documents.entries) { entry in
-                    DocumentRow(entry: entry, isCurrent: entry.id == documentID)
-                        .tag(SidebarItem.document(entry.id))
-                        .contextMenu {
-                            if entry.id != documentID {
-                                Button("Show") { documents.focus(id: entry.id) }
-                            }
-                            if let url = entry.fileURL {
-                                Button("Show in Finder") {
-                                    NSWorkspace.shared.activateFileViewerSelecting([url])
+            if showsOpen {
+                Section(isExpanded: $openExpanded) {
+                    ForEach(documents.entries) { entry in
+                        DocumentRow(entry: entry, isCurrent: entry.id == documentID)
+                            .tag(SidebarItem.document(entry.id))
+                            .contextMenu {
+                                if entry.id != documentID {
+                                    Button("Show") { documents.focus(id: entry.id, over: documentID) }
                                 }
+                                if let url = entry.fileURL {
+                                    Button("Show in Finder") {
+                                        NSWorkspace.shared.activateFileViewerSelecting([url])
+                                    }
+                                }
+                                Divider()
+                                Button("Close") { documents.close(id: entry.id) }
                             }
-                            Divider()
-                            Button("Close") { documents.close(id: entry.id) }
-                        }
-                }
-            } header: {
-                Text("Open")
-            }
-
-            Section(isExpanded: $contentsExpanded) {
-                if outline.isEmpty {
-                    Text("Headings appear here")
-                        .foregroundStyle(.tertiary)
-                        .selectionDisabled()
-                } else {
-                    let base = outline.map(\.level).min() ?? 1
-                    ForEach(outline) { entry in
-                        HeadingRow(entry: entry, indent: entry.level - base, isCurrent: entry.id == current)
-                            .tag(SidebarItem.heading(entry.utf16Location))
                     }
+                } header: {
+                    Text("Open")
                 }
-            } header: {
-                Text("Contents")
             }
 
-            if !documents.recentURLs.isEmpty {
+            if showsContents {
+                Section(isExpanded: $contentsExpanded) {
+                    if outline.isEmpty {
+                        Text("Headings appear here")
+                            .foregroundStyle(.tertiary)
+                            .selectionDisabled()
+                    } else {
+                        let base = outline.map(\.level).min() ?? 1
+                        ForEach(outline) { entry in
+                            HeadingRow(entry: entry, indent: entry.level - base, isCurrent: entry.id == current)
+                                .tag(SidebarItem.heading(entry.utf16Location))
+                        }
+                    }
+                } header: {
+                    Text("Contents")
+                }
+            }
+
+            if showsFolder, let root = folder.root {
+                Section(isExpanded: $folderExpanded) {
+                    FolderPathMenu(folder: folder, root: root)
+                        .selectionDisabled()
+                    FolderRows(folder: folder, parent: root, onOpen: { open($0, inNewWindow: $1) })
+                } header: {
+                    Text("Folder")
+                }
+            }
+
+            if showsRecent, !documents.recentURLs.isEmpty {
                 Section(isExpanded: $recentExpanded) {
                     ForEach(documents.recentURLs.prefix(8), id: \.self) { url in
                         Label {
@@ -89,8 +111,10 @@ struct Sidebar: View {
                         }
                         .help(url.path(percentEncoded: false))
                         .tag(SidebarItem.recent(url))
+                        .openInNewWindowOnCommandClick { open(url, inNewWindow: true) }
                         .contextMenu {
                             Button("Open") { open(url) }
+                            Button("Open in New Window") { open(url, inNewWindow: true) }
                             Button("Show in Finder") {
                                 NSWorkspace.shared.activateFileViewerSelecting([url])
                             }
@@ -124,6 +148,9 @@ struct Sidebar: View {
             selection = .document(documentID)
             documents.refreshRecents()
         }
+        .onChange(of: fileURL, initial: true) { _, url in
+            folder.reveal(url)
+        }
         .onChange(of: selection) { _, item in
             handle(item)
         }
@@ -144,22 +171,27 @@ struct Sidebar: View {
         guard let item, item != .document(documentID) else { return }
         switch item {
         case let .document(id):
-            documents.focus(id: id)
+            documents.focus(id: id, over: documentID)
         case let .heading(location):
             if let entry = outline.first(where: { $0.utf16Location == location }) {
                 onSelectHeading(entry)
             }
-        case let .recent(url):
-            open(url)
+        case let .folder(url):
+            folder.setExpanded(url, !folder.isExpanded(url))
+        case let .file(url), let .recent(url):
+            // A Command-click is the row's to handle: it opens a new window.
+            if !NSEvent.modifierFlags.contains(.command) {
+                open(url)
+            }
         }
         selection = .document(documentID)
     }
 
-    private func open(_ url: URL) {
-        Task {
-            try? await openDocument(at: url)
-            documents.refreshRecents()
-        }
+    /// Shows `url` in this window's spot, keeping the current file open behind it, or in a new
+    /// window. Either way the folder tree comes along, so browsing picks up where it was.
+    private func open(_ url: URL, inNewWindow: Bool = false) {
+        folder.handOff(to: url)
+        documents.open(url, over: inNewWindow ? nil : documentID)
     }
 }
 
@@ -199,6 +231,144 @@ private struct DocumentRow: View {
     }
 }
 
+/// The folder the tree starts at. The arrow moves the tree up one folder, and the folder's menu
+/// moves it to any folder above.
+private struct FolderPathMenu: View {
+    var folder: FolderBrowser
+    var root: URL
+
+    var body: some View {
+        HStack(spacing: 6) {
+            menu
+            Spacer(minLength: 0)
+            if let parent = folder.ancestors.first {
+                Button {
+                    folder.browse(parent)
+                } label: {
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 11, weight: .semibold))
+                        .frame(width: 20, height: 20)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.secondary)
+                .help("Go up to “\(Self.name(of: parent))”")
+                .accessibilityLabel("Go up to \(Self.name(of: parent))")
+            }
+        }
+    }
+
+    private var menu: some View {
+        Menu {
+            Section("Enclosing Folders") {
+                ForEach(folder.ancestors, id: \.self) { url in
+                    Button {
+                        folder.browse(url)
+                    } label: {
+                        Label(Self.name(of: url), systemImage: "folder")
+                    }
+                }
+            }
+            if let home = folder.fileFolder, home != root {
+                Divider()
+                Button("Back to “\(Self.name(of: home))”") {
+                    folder.browse(home)
+                }
+            }
+            Divider()
+            Button("Show in Finder") {
+                NSWorkspace.shared.activateFileViewerSelecting([root])
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Label(Self.name(of: root), systemImage: "folder.fill")
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .contentShape(Rectangle())
+        }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .help(root.path(percentEncoded: false))
+        .accessibilityLabel("Folder: \(Self.name(of: root))")
+        .accessibilityHint("Shows the folders above this one")
+    }
+
+    static func name(of folder: URL) -> String {
+        FileManager.default.displayName(atPath: folder.path(percentEncoded: false))
+    }
+}
+
+/// One folder's subfolders and Markdown files. Subfolders open in place, so the whole tree reads
+/// as one list.
+private struct FolderRows: View {
+    var folder: FolderBrowser
+    var parent: URL
+    var onOpen: (_ url: URL, _ inNewWindow: Bool) -> Void
+
+    var body: some View {
+        if let entries = folder.entries(in: parent) {
+            if entries.isEmpty {
+                Text("No Markdown files")
+                    .foregroundStyle(.tertiary)
+                    .selectionDisabled()
+            }
+            ForEach(entries) { entry in
+                if entry.isFolder {
+                    DisclosureGroup(isExpanded: expansion(of: entry.url)) {
+                        AnyView(FolderRows(folder: folder, parent: entry.url, onOpen: onOpen))
+                    } label: {
+                        Label(entry.name, systemImage: "folder")
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .help(entry.url.path(percentEncoded: false))
+                            .tag(SidebarItem.folder(entry.url))
+                            .contextMenu {
+                                Button("Show in Finder") {
+                                    NSWorkspace.shared.activateFileViewerSelecting([entry.url])
+                                }
+                            }
+                    }
+                } else {
+                    let isCurrent = entry.url == folder.file
+                    Label {
+                        Text(entry.name)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    } icon: {
+                        Image(systemName: isCurrent ? "doc.text.fill" : "doc.text")
+                    }
+                    .fontWeight(isCurrent ? .semibold : .regular)
+                    .help(entry.url.path(percentEncoded: false))
+                    .accessibilityAddTraits(isCurrent ? .isSelected : [])
+                    .tag(SidebarItem.file(entry.url))
+                    .openInNewWindowOnCommandClick { onOpen(entry.url, true) }
+                    .contextMenu {
+                        if !isCurrent {
+                            Button("Open") { onOpen(entry.url, false) }
+                            Button("Open in New Window") { onOpen(entry.url, true) }
+                        }
+                        Button("Show in Finder") {
+                            NSWorkspace.shared.activateFileViewerSelecting([entry.url])
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func expansion(of url: URL) -> Binding<Bool> {
+        Binding(
+            get: { folder.isExpanded(url) },
+            set: { folder.setExpanded(url, $0) }
+        )
+    }
+}
+
 private struct HeadingRow: View {
     var entry: OutlineEntry
     var indent: Int
@@ -213,5 +383,12 @@ private struct HeadingRow: View {
             .padding(.leading, CGFloat(min(indent, 4)) * 12)
             .help(entry.title)
             .accessibilityAddTraits(isCurrent ? .isSelected : [])
+    }
+}
+
+private extension View {
+    /// Command-click opens a file in a new window, the way it opens a link in a new window.
+    func openInNewWindowOnCommandClick(_ action: @escaping () -> Void) -> some View {
+        simultaneousGesture(TapGesture().modifiers(.command).onEnded(action))
     }
 }

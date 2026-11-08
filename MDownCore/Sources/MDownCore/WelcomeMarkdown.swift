@@ -31,9 +31,10 @@ public enum WelcomeMarkdown {
     | --- | --- |
     | Open | Every open document. Click one to switch to it. |
     | Contents | This document's headings. Click one to jump there. |
+    | Folder | The Markdown files and folders around this one. The arrow goes up a folder. |
     | Recent | Files you opened before. |
 
-    Hide or show the sidebar with Control-Command-S.
+    A file you click in Folder or Recent opens in this window and stays in Open until you close it. Command-click opens it in a new window. Choose which sections appear in Settings, and hide or show the sidebar with Control-Command-S.
 
     ## Code
 

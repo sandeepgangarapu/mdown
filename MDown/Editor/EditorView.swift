@@ -34,6 +34,7 @@ struct EditorView: View {
     @State private var prefixCache = ParseCache()
     @State private var suffixCache = ParseCache()
     @State private var tracker = PageTracker()
+    @State private var folder = FolderBrowser()
     @State private var editing: PageEditing?
     @State private var caret = NSRange(location: 0, length: 0)
     @State private var caretRevision = 0
@@ -64,6 +65,8 @@ struct EditorView: View {
         NavigationSplitView {
             Sidebar(
                 documentID: documentID,
+                fileURL: fileURL,
+                folder: folder,
                 outline: outline,
                 tracker: tracker,
                 editingLocation: editing?.location,

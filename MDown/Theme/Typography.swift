@@ -42,6 +42,11 @@ enum MDownSettings {
     static let sidebarOpenExpanded = "mdown.sidebar.open"
     static let sidebarContentsExpanded = "mdown.sidebar.contents"
     static let sidebarRecentExpanded = "mdown.sidebar.recent"
+    static let sidebarFolderExpanded = "mdown.sidebar.folder"
+    static let sidebarShowsOpen = "mdown.sidebar.showsOpen"
+    static let sidebarShowsContents = "mdown.sidebar.showsContents"
+    static let sidebarShowsFolder = "mdown.sidebar.showsFolder"
+    static let sidebarShowsRecent = "mdown.sidebar.showsRecent"
 
     static let defaultFontSize = 17.0
     static let defaultFace = PageFace.sans

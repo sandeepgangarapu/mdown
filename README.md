@@ -29,7 +29,7 @@ MDown isn't trying to be the most powerful Markdown editor. It's trying to be th
 - Opens Markdown instantly, as a clean page.
 - Click any block to edit the Markdown behind it. Press Escape or click away to read.
 - Return, Tab, and the arrow keys do what you'd expect: new paragraphs, nested lists, the next block.
-- Lists your open files, the current file's headings, and recent files in the sidebar.
+- Lists your open files, the current file's headings, the files in its folder, and recent files in the sidebar. Click a file to read it in the same window, or go up a folder to look around. Choose which sections show in Settings.
 - Uses shortcuts you already know: ⌘B, ⌘K, and ⌘F, plus ⇧⌘T, ⇧⌘H, ⇧⌘B, and ⇧⌘L for title, heading, body, and checklist, the same as Notes.
 - Works with plain `.md` files. No account, sync, or vault. Git, your terminal, and your AI tools read the same file you do.
 - Keeps your words on your Mac. Only update checks and linked images go online.
