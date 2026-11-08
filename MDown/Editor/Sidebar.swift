@@ -40,7 +40,6 @@ struct Sidebar: View {
     @AppStorage(MDownSettings.sidebarShowsRecent) private var showsRecent = true
     @AppStorage(MDownSettings.sidebarOpenExpanded) private var openExpanded = true
     @AppStorage(MDownSettings.sidebarContentsExpanded) private var contentsExpanded = true
-    @AppStorage(MDownSettings.sidebarFolderExpanded) private var folderExpanded = true
     @AppStorage(MDownSettings.sidebarRecentExpanded) private var recentExpanded = true
     @State private var selection: SidebarItem?
 
@@ -91,7 +90,7 @@ struct Sidebar: View {
             }
 
             if showsFolder, let root = folder.root {
-                Section(isExpanded: $folderExpanded) {
+                Section(isExpanded: Bindable(documents).folderSectionExpanded) {
                     FolderPathMenu(folder: folder, root: root)
                         .selectionDisabled()
                     FolderRows(folder: folder, parent: root, onOpen: { open($0, inNewWindow: $1) })
@@ -150,6 +149,9 @@ struct Sidebar: View {
         }
         .onChange(of: fileURL, initial: true) { _, url in
             folder.reveal(url)
+        }
+        .onChange(of: showsFolder && documents.folderSectionExpanded, initial: true) { _, isOnScreen in
+            folder.isActive = isOnScreen
         }
         .onChange(of: selection) { _, item in
             handle(item)
@@ -305,10 +307,19 @@ private struct FolderPathMenu: View {
 
 /// One folder's subfolders and Markdown files. Subfolders open in place, so the whole tree reads
 /// as one list.
+///
+/// A folder shows its first 50 entries, and 50 more each time you ask. The sidebar list builds
+/// every row up front and slows down sharply as rows are added: 200 rows add about 260 ms to
+/// opening a window, 2,000 take about 5 seconds to show, and 5,000 more than 40. The file being
+/// read is always shown.
 private struct FolderRows: View {
+    static let pageSize = 50
+
     var folder: FolderBrowser
     var parent: URL
     var onOpen: (_ url: URL, _ inNewWindow: Bool) -> Void
+
+    @State private var limit = Self.pageSize
 
     var body: some View {
         if let entries = folder.entries(in: parent) {
@@ -317,7 +328,7 @@ private struct FolderRows: View {
                     .foregroundStyle(.tertiary)
                     .selectionDisabled()
             }
-            ForEach(entries) { entry in
+            ForEach(shown(entries)) { entry in
                 if entry.isFolder {
                     DisclosureGroup(isExpanded: expansion(of: entry.url)) {
                         AnyView(FolderRows(folder: folder, parent: entry.url, onOpen: onOpen))
@@ -358,7 +369,29 @@ private struct FolderRows: View {
                     }
                 }
             }
+            if entries.count > limit {
+                let hidden = entries.count - limit
+                Button {
+                    limit += Self.pageSize
+                } label: {
+                    Label("Show \(min(hidden, Self.pageSize)) more…", systemImage: "ellipsis")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("\(hidden) more in this folder")
+                .selectionDisabled()
+            }
         }
+    }
+
+    /// The first `limit` entries, plus the file being read when it's further down.
+    private func shown(_ entries: [FolderEntry]) -> [FolderEntry] {
+        guard entries.count > limit else { return entries }
+        var shown = Array(entries.prefix(limit))
+        if let file = folder.file, let current = entries.dropFirst(limit).first(where: { $0.url == file }) {
+            shown.append(current)
+        }
+        return shown
     }
 
     private func expansion(of url: URL) -> Binding<Bool> {

@@ -33,6 +33,9 @@ final class OpenDocuments {
 
     private(set) var entries: [Entry] = []
     private(set) var recentURLs: [URL] = []
+    /// Whether the sidebar's Folder section is open. Every window shares it while MDown runs, so
+    /// browsing from one file to the next keeps it open, and each launch starts with it closed.
+    var folderSectionExpanded = false
     @ObservationIgnored private var titleObservations: [UUID: NSKeyValueObservation] = [:]
     /// The stack a file joins when it opens in another window's spot.
     @ObservationIgnored private var pendingStacks: [URL: UUID] = [:]

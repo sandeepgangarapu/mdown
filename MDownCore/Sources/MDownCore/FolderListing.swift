@@ -49,6 +49,8 @@ public enum FolderListing {
         fileManager: FileManager = .default
     ) -> [FolderEntry] {
         let folder = normalized(folder, isFolder: true)
+        // Fetched with the listing in one pass. Names are the file names as they are on disk:
+        // asking for each file's Finder display name costs about 30 µs a file, 150 ms for 5,000.
         let keys: [URLResourceKey] = [.isDirectoryKey, .isPackageKey]
         guard let urls = try? fileManager.contentsOfDirectory(
             at: folder,
@@ -56,24 +58,28 @@ public enum FolderListing {
             options: [.skipsHiddenFiles]
         ) else { return [] }
         let included = file.map { normalized($0, isFolder: false) }
+        let keySet = Set(keys)
 
         var folders: [FolderEntry] = []
         var files: [FolderEntry] = []
-        for url in urls where !url.lastPathComponent.hasPrefix(".") {
-            let values = try? url.resourceValues(forKeys: Set(keys))
-            let isFolder = values?.isDirectory == true && values?.isPackage != true
-            let entryURL = normalized(url, isFolder: isFolder)
-            if isFolder {
-                folders.append(FolderEntry(url: entryURL, name: url.lastPathComponent, isFolder: true))
-            } else if values?.isDirectory != true, isMarkdown(url) || entryURL == included {
-                let name = fileManager.displayName(atPath: url.path(percentEncoded: false))
-                files.append(FolderEntry(url: entryURL, name: name, isFolder: false))
+        for url in urls {
+            let name = url.lastPathComponent
+            guard !name.hasPrefix("."), let values = try? url.resourceValues(forKeys: keySet) else { continue }
+            if values.isDirectory == true {
+                guard values.isPackage != true else { continue }
+                folders.append(FolderEntry(url: folder.appending(path: name, directoryHint: .isDirectory), name: name, isFolder: true))
+                continue
             }
+            let entryURL = folder.appending(path: name, directoryHint: .notDirectory)
+            guard isMarkdown(url) || entryURL == included else { continue }
+            files.append(FolderEntry(url: entryURL, name: name, isFolder: false))
         }
-        let byName: (FolderEntry, FolderEntry) -> Bool = {
-            $0.name.localizedStandardCompare($1.name) == .orderedAscending
-        }
-        return folders.sorted(by: byName) + files.sorted(by: byName)
+        return sortedByName(folders) + sortedByName(files)
+    }
+
+    /// Finder's name order: "note 2" before "note 10".
+    private static func sortedByName(_ entries: [FolderEntry]) -> [FolderEntry] {
+        entries.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
     /// The folders above `folder`, nearest first, ending at the root of the disk.

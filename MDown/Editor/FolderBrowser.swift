@@ -5,6 +5,9 @@ import Observation
 /// The folder tree in a window's sidebar. It starts at the document's folder and can move up to
 /// any folder above it. Shown folders are watched, so files that appear, move, or go away
 /// (an AI tool writing a new plan, a rename in Finder) show up right away.
+///
+/// Folders are listed in the background, so a big folder never holds up a click or a window
+/// opening, and nothing is listed or watched while the Folder section is closed.
 @MainActor
 @Observable
 final class FolderBrowser {
@@ -13,16 +16,38 @@ final class FolderBrowser {
     private(set) var contents: [URL: [FolderEntry]] = [:]
     /// The document this window shows.
     private(set) var file: URL?
+    /// Whether the tree is on screen. Turning it on shows the last listing at once and refreshes
+    /// it in the background.
+    var isActive = false {
+        didSet {
+            guard isActive != oldValue else { return }
+            if isActive {
+                contents.keys.forEach(load)
+            }
+            sync()
+        }
+    }
 
     @ObservationIgnored private var watchers: [URL: DirectoryWatcher] = [:]
+    /// Folders being listed, and those that changed again while they were.
+    @ObservationIgnored private var loading: Set<URL> = []
+    @ObservationIgnored private var stale: Set<URL> = []
 
-    /// Where a window was browsing when it opened a file, so the new window picks up the same tree.
-    private static var handoffs: [URL: (root: URL, expanded: Set<URL>)] = [:]
+    /// Where a window was browsing when it opened a file, so the new window picks up the same tree
+    /// without listing it again.
+    private struct Handoff {
+        var root: URL
+        var expanded: Set<URL>
+        var contents: [URL: [FolderEntry]]
+    }
+
+    private static var handoffs: [URL: Handoff] = [:]
 
     var fileFolder: URL? { file.map(FolderListing.folder(of:)) }
 
     var ancestors: [URL] { root.map(FolderListing.ancestors(of:)) ?? [] }
 
+    /// A folder's subfolders and Markdown files, or nil while it's still being listed.
     func entries(in folder: URL) -> [FolderEntry]? { contents[folder] }
 
     func isExpanded(_ folder: URL) -> Bool { expanded.contains(folder) }
@@ -38,11 +63,16 @@ final class FolderBrowser {
             sync()
             return
         }
+        let folder = FolderListing.folder(of: file)
         if let handoff = Self.handoffs.removeValue(forKey: file) {
             root = handoff.root
             expanded = handoff.expanded
+            contents = handoff.contents
+            // A file that isn't Markdown is only listed when it's the one being read.
+            if !FolderListing.isMarkdown(file) {
+                contents[folder] = nil
+            }
         }
-        let folder = FolderListing.folder(of: file)
         if let root, let path = FolderListing.path(from: root, to: folder) {
             expanded.formUnion(path.dropFirst())
         } else {
@@ -78,19 +108,28 @@ final class FolderBrowser {
     /// Opens the same tree in the window that shows `file` next.
     func handOff(to file: URL) {
         guard let root else { return }
-        Self.handoffs[FolderListing.normalized(file, isFolder: false)] = (root, expanded)
+        Self.handoffs[FolderListing.normalized(file, isFolder: false)] = Handoff(
+            root: root,
+            expanded: expanded,
+            contents: contents
+        )
     }
 
-    /// Loads every folder that's on screen, and watches only those.
+    /// Lists every folder that's on screen and not listed yet, and watches only those.
     private func sync() {
+        guard isActive, let root else {
+            watchers = [:]
+            return
+        }
         var visible: Set<URL> = []
-        var pending = root.map { [$0] } ?? []
+        var pending = [root]
         while let folder = pending.popLast() {
             visible.insert(folder)
-            if contents[folder] == nil {
-                contents[folder] = FolderListing.entries(in: folder, including: file)
+            guard let entries = contents[folder] else {
+                load(folder)
+                continue
             }
-            for entry in contents[folder] ?? [] where entry.isFolder && expanded.contains(entry.url) {
+            for entry in entries where entry.isFolder && expanded.contains(entry.url) {
                 pending.append(entry.url)
             }
         }
@@ -107,19 +146,38 @@ final class FolderBrowser {
         }
     }
 
+    /// Lists `folder` off the main thread. A folder that changes while it's being listed is listed
+    /// again when that finishes.
+    private func load(_ folder: URL) {
+        guard loading.insert(folder).inserted else {
+            stale.insert(folder)
+            return
+        }
+        let file = file
+        Task.detached(priority: .userInitiated) { [weak self] in
+            let entries = FolderListing.entries(in: folder, including: file)
+            await self?.loaded(entries, in: folder)
+        }
+    }
+
+    private func loaded(_ entries: [FolderEntry], in folder: URL) {
+        loading.remove(folder)
+        if stale.remove(folder) != nil {
+            load(folder)
+        }
+        if contents[folder] != entries {
+            contents[folder] = entries
+        }
+        sync()
+    }
+
     private func folderChanged(_ folder: URL, moved: Bool) {
         guard contents[folder] != nil else { return }
         if moved {
-            // The watcher follows the old folder. Look again by name.
+            // The watcher follows the old folder. Watch it again by name once it's listed.
             watchers[folder] = nil
-            contents[folder] = nil
-            sync()
-            return
         }
-        let entries = FolderListing.entries(in: folder, including: file)
-        guard entries != contents[folder] else { return }
-        contents[folder] = entries
-        sync()
+        load(folder)
     }
 }
 
