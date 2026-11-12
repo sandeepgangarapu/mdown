@@ -216,9 +216,12 @@ struct RichText: View {
 
     @Environment(\.findTerm) private var findTerm
     @Environment(\.reviewMarks) private var reviewMarks
+    @Environment(\.isPrinting) private var isPrinting
 
     var body: some View {
-        Text(highlightingMatches(of: findTerm, in: attributedInlines(nodes, style: style, marks: reviewMarks)))
+        let string = highlightingMatches(of: findTerm, in: attributedInlines(nodes, style: style, marks: reviewMarks))
+        // In print, links are marked so the PDF can make them clickable.
+        (isPrinting ? linkMarkedText(string) : Text(string))
             .lineSpacing(lineSpacing)
             .multilineTextAlignment(alignment)
             .fixedSize(horizontal: false, vertical: true)

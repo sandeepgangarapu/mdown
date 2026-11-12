@@ -199,6 +199,8 @@ struct BlockView: View {
     var path: [Int]
 
     @Environment(\.taskContext) private var taskContext
+    @Environment(\.isPrinting) private var isPrinting
+    @Environment(\.printListEnd) private var printListEnd
 
     var body: some View {
         switch block {
@@ -254,7 +256,9 @@ struct BlockView: View {
     }
 
     private func itemList(_ items: [ListItemNode], orderedStart: Int?) -> some View {
-        let lastNumber = (orderedStart ?? 1) + max(items.count - 1, 0)
+        // A printed list broken across pages sizes its numbers for the whole list, not this piece.
+        let wholeListEnd = path.isEmpty ? printListEnd ?? 0 : 0
+        let lastNumber = max((orderedStart ?? 1) + max(items.count - 1, 0), wholeListEnd)
         let numberWidth = CGFloat("\(lastNumber).".count) * style.size * 0.56
         return VStack(alignment: .leading, spacing: style.size * 0.35) {
             ForEach(Array(items.enumerated()), id: \.offset) { index, item in
@@ -278,21 +282,25 @@ struct BlockView: View {
     private func marker(for item: ListItemNode, path: [Int], number: Int?, numberWidth: CGFloat) -> some View {
         if let check = item.check {
             let checked = check == .checked
-            let toggle = taskContext.flatMap { context in context.indices[path].map { index in { context.toggle(index) } } }
-            Button {
-                toggle?()
-            } label: {
-                Image(systemName: checked ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: style.size * 0.95, weight: .regular))
-                    .foregroundStyle(checked ? Color(nsColor: style.colors.accent) : Color(nsColor: style.colors.tertiary))
-                    .frame(width: style.size * 1.2, alignment: .center)
-                    .contentShape(Rectangle())
+            let symbol = Image(systemName: checked ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: style.size * 0.95, weight: .regular))
+                .foregroundStyle(checked ? Color(nsColor: style.colors.accent) : Color(nsColor: style.colors.tertiary))
+                .frame(width: style.size * 1.2, alignment: .center)
+            if isPrinting {
+                symbol
+            } else {
+                let toggle = taskContext.flatMap { context in context.indices[path].map { index in { context.toggle(index) } } }
+                Button {
+                    toggle?()
+                } label: {
+                    symbol.contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(toggle == nil)
+                .pointerStyle(toggle == nil ? nil : .link)
+                .accessibilityLabel(checked ? "Completed" : "Not completed")
+                .accessibilityAddTraits(.isToggle)
             }
-            .buttonStyle(.plain)
-            .disabled(toggle == nil)
-            .pointerStyle(toggle == nil ? nil : .link)
-            .accessibilityLabel(checked ? "Completed" : "Not completed")
-            .accessibilityAddTraits(.isToggle)
         } else if let number {
             Text("\(number).")
                 .font(style.font())
@@ -385,20 +393,35 @@ private struct CodeBlockView: View {
     @State private var hovering = false
     @State private var copied = false
     @Environment(\.findTerm) private var findTerm
+    @Environment(\.isPrinting) private var isPrinting
 
     private var displayCode: String {
         source.hasSuffix("\n") ? String(source.dropLast()) : source
     }
 
+    private var code: some View {
+        Text(highlightingMatches(of: findTerm, in: highlightedCode(displayCode, language: language, colors: colors, size: size)))
+            .lineSpacing(size * 0.3)
+    }
+
     var body: some View {
-        ScrollView(.horizontal) {
-            Text(highlightingMatches(of: findTerm, in: highlightedCode(displayCode, language: language, colors: colors, size: size)))
-                .lineSpacing(size * 0.3)
-                .fixedSize(horizontal: true, vertical: true)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
+        Group {
+            if isPrinting {
+                // Paper can't scroll, so long lines wrap.
+                code
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, (size * 1.15).rounded())
+                    .padding(.vertical, size)
+            } else {
+                ScrollView(.horizontal) {
+                    code
+                        .fixedSize(horizontal: true, vertical: true)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                }
+                .scrollIndicators(.automatic)
+            }
         }
-        .scrollIndicators(.automatic)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(nsColor: colors.codeBackground), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay(alignment: .topTrailing) {
@@ -415,7 +438,7 @@ private struct CodeBlockView: View {
                     .transition(.opacity)
                 } else if let language, !language.isEmpty {
                     Text(language)
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: isPrinting ? (size * 0.85).rounded() : 11, weight: .medium))
                         .foregroundStyle(Color(nsColor: colors.tertiary))
                         .padding(.vertical, 4)
                 }
@@ -551,6 +574,9 @@ private struct MarkdownImage: View {
     var baseDirectory: URL?
     var colors: MDownPalette.Colors
 
+    @Environment(\.isPrinting) private var isPrinting
+    @Environment(\.printImages) private var printImages
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             image
@@ -573,6 +599,13 @@ private struct MarkdownImage: View {
     @ViewBuilder
     private var image: some View {
         switch ImageLocator.resolve(source: source, relativeTo: baseDirectory) {
+        case let .remote(url) where isPrinting:
+            // A printed page is drawn once, so the image was fetched beforehand.
+            if let nsImage = printImages[url] {
+                framed(Image(nsImage: nsImage))
+            } else {
+                missing(caption: alt.isEmpty ? url.absoluteString : alt)
+            }
         case let .remote(url):
             AsyncImage(url: url) { phase in
                 switch phase {

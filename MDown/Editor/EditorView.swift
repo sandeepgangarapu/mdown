@@ -115,6 +115,10 @@ struct EditorView: View {
             }
         }
         .focusedSceneValue(\.editorFormatting, formatting)
+        .focusedSceneValue(\.editorExport, EditorExport(
+            request: { exportRequest },
+            window: { reloader.window }
+        ))
         .focusedSceneValue(\.editorFind, EditorFind(
             show: { findPresented = true },
             next: { stepFind(forward: true) },
@@ -233,6 +237,16 @@ struct EditorView: View {
                 returnKey: { handleReturn($0) },
                 tab: { handleTab($0, outdent: $1) }
             )
+        )
+    }
+
+    /// The page as it stands, for Export as PDF and Print.
+    private var exportRequest: PDFRequest {
+        PDFRequest(
+            markdown: document.text,
+            title: fileURL?.deletingPathExtension().lastPathComponent ?? reloader.window?.title ?? "Untitled",
+            baseDirectory: fileURL?.deletingLastPathComponent(),
+            face: face
         )
     }
 

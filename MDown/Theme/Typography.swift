@@ -58,6 +58,9 @@ struct PageStyle {
     var size: CGFloat
     var face: PageFace
     var colors: MDownPalette.Colors
+    /// The smallest code text. On screen code never drops below 11 points; a printed page, set
+    /// smaller, lowers it.
+    var minimumCodeSize: CGFloat = 11
 
     /// Extra space between lines, shared by the typeset page and the inline editor so a block does
     /// not change height when it opens for editing.
@@ -68,7 +71,7 @@ struct PageStyle {
 
     var blockSpacing: CGFloat { (size * 0.75).rounded() }
 
-    var codeSize: CGFloat { max(11, (size * 0.82).rounded()) }
+    var codeSize: CGFloat { max(minimumCodeSize, (size * 0.82).rounded()) }
 
     func headingSize(_ level: Int) -> CGFloat {
         let scale: CGFloat

@@ -5,6 +5,7 @@ import SwiftUI
 struct MDownCommands: Commands {
     @FocusedValue(\.editorFormatting) private var formatting
     @FocusedValue(\.editorFind) private var find
+    @FocusedValue(\.editorExport) private var export
     @AppStorage(MDownSettings.fontSize) private var fontSize = MDownSettings.defaultFontSize
     @AppStorage(MDownSettings.showWordCount) private var showWordCount = false
 
@@ -12,6 +13,17 @@ struct MDownCommands: Commands {
         CommandGroup(after: .appInfo) {
             Button("Check for Updates…") { AppUpdater.shared.checkForUpdates() }
                 .disabled(!AppUpdater.shared.canCheckForUpdates)
+        }
+
+        CommandGroup(replacing: .printItem) {
+            Button("Export as PDF…") { export.map(PDFExport.shared.exportPDF) }
+                .disabled(export == nil || PDFExport.shared.isBusy)
+            Divider()
+            Button("Page Setup…") { PDFExport.shared.pageSetup() }
+                .keyboardShortcut("p", modifiers: [.command, .shift])
+            Button("Print…") { export.map(PDFExport.shared.print) }
+                .keyboardShortcut("p", modifiers: .command)
+                .disabled(export == nil || PDFExport.shared.isBusy)
         }
 
         SidebarCommands()

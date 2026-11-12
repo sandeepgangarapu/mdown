@@ -29,6 +29,8 @@
 		F0000000000000000000005A /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000059 /* FileWatcher.swift */; };
 		F0000000000000000000005C /* ReviewSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000005B /* ReviewSession.swift */; };
 		F0000000000000000000005E /* ChangesPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000005D /* ChangesPage.swift */; };
+		F00000000000000000000060 /* PDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000005F /* PDFRenderer.swift */; };
+		F00000000000000000000062 /* PDFExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000061 /* PDFExport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +56,8 @@
 		F00000000000000000000059 /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcher.swift; sourceTree = "<group>"; };
 		F0000000000000000000005B /* ReviewSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSession.swift; sourceTree = "<group>"; };
 		F0000000000000000000005D /* ChangesPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesPage.swift; sourceTree = "<group>"; };
+		F0000000000000000000005F /* PDFRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFRenderer.swift; sourceTree = "<group>"; };
+		F00000000000000000000061 /* PDFExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExport.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +110,15 @@
 			path = Preview;
 			sourceTree = "<group>";
 		};
+		F00000000000000000000063 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000061 /* PDFExport.swift */,
+				F0000000000000000000005F /* PDFRenderer.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
 		F00000000000000000000014 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
@@ -129,6 +142,7 @@
 				F00000000000000000000011 /* App */,
 				F00000000000000000000012 /* Editor */,
 				F00000000000000000000013 /* Preview */,
+				F00000000000000000000063 /* Export */,
 				F00000000000000000000014 /* Settings */,
 				F00000000000000000000015 /* Theme */,
 				F0000000000000000000001A /* Assets.xcassets */,
@@ -233,6 +247,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0000000000000000000005E /* ChangesPage.swift in Sources */,
+				F00000000000000000000060 /* PDFRenderer.swift in Sources */,
+				F00000000000000000000062 /* PDFExport.swift in Sources */,
 				F0000000000000000000005C /* ReviewSession.swift in Sources */,
 				F0000000000000000000005A /* FileWatcher.swift in Sources */,
 				F00000000000000000000054 /* AppUpdater.swift in Sources */,
