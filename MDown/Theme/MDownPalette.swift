@@ -35,6 +35,9 @@ enum MDownPalette {
         var number: NSColor
         var typeName: NSColor
         var comment: NSColor
+        /// Text a change adds, and text it takes out, on the Changes tab.
+        var added: NSColor
+        var removed: NSColor
     }
 
     static func colors(theme: PageTheme, scheme: ColorScheme) -> Colors {
@@ -63,7 +66,9 @@ enum MDownPalette {
         string: .systemRed,
         number: .systemPurple,
         typeName: .systemTeal,
-        comment: .secondaryLabelColor
+        comment: .secondaryLabelColor,
+        added: .systemGreen,
+        removed: .systemRed
     )
 
     private static let paperLight = Colors(
@@ -81,7 +86,9 @@ enum MDownPalette {
         string: NSColor(srgbRed: 0.184, green: 0.416, blue: 0.271, alpha: 1),
         number: NSColor(srgbRed: 0.631, green: 0.361, blue: 0.180, alpha: 1),
         typeName: NSColor(srgbRed: 0.243, green: 0.337, blue: 0.471, alpha: 1),
-        comment: NSColor(srgbRed: 0.541, green: 0.506, blue: 0.463, alpha: 1)
+        comment: NSColor(srgbRed: 0.541, green: 0.506, blue: 0.463, alpha: 1),
+        added: NSColor(srgbRed: 0.231, green: 0.522, blue: 0.318, alpha: 1),
+        removed: NSColor(srgbRed: 0.722, green: 0.212, blue: 0.161, alpha: 1)
     )
 
     private static let paperDark = Colors(
@@ -99,6 +106,8 @@ enum MDownPalette {
         string: NSColor(srgbRed: 0.718, green: 0.831, blue: 0.753, alpha: 1),
         number: NSColor(srgbRed: 0.886, green: 0.706, blue: 0.541, alpha: 1),
         typeName: NSColor(srgbRed: 0.773, green: 0.816, blue: 0.894, alpha: 1),
-        comment: NSColor(srgbRed: 0.549, green: 0.514, blue: 0.471, alpha: 1)
+        comment: NSColor(srgbRed: 0.549, green: 0.514, blue: 0.471, alpha: 1),
+        added: NSColor(srgbRed: 0.553, green: 0.788, blue: 0.592, alpha: 1),
+        removed: NSColor(srgbRed: 0.945, green: 0.522, blue: 0.467, alpha: 1)
     )
 }

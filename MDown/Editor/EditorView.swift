@@ -28,6 +28,7 @@ struct EditorView: View {
     @AppStorage(MDownSettings.theme) private var theme: PageTheme = MDownSettings.defaultTheme
     @AppStorage(MDownSettings.showWordCount) private var showWordCount = false
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.undoManager) private var undoManager
 
     @State private var documentID = UUID()
     @State private var parseCache = ParseCache()
@@ -44,10 +45,20 @@ struct EditorView: View {
     @State private var findText = ""
     @State private var findPresented = false
     @State private var findIndex: Int?
+    @State private var review = ReviewSession()
+    @State private var reloader = DocumentReloader()
+    @State private var changesScroll: ChangesScroll?
+    @FocusState private var changesFocused: Bool
 
     private struct ScrollRequest: Equatable {
         var id: PageRowID
         var anchor: UnitPoint?
+        var token = UUID()
+    }
+
+    private struct ChangesScroll: Equatable {
+        var row: String
+        var anchor: UnitPoint = .center
         var token = UUID()
     }
 
@@ -61,6 +72,7 @@ struct EditorView: View {
         let outline = MarkdownOutline.entries(from: blocks)
         let layout = layout(of: document.text)
         let formatting = self.formatting
+        let presentation = review.presentation(for: document.text)
 
         NavigationSplitView {
             Sidebar(
@@ -74,18 +86,32 @@ struct EditorView: View {
             )
             .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 360)
         } detail: {
-            page(layout: layout, style: style)
-                .toolbar(id: "mdown.editor") {
-                    FormatToolbar(formatting: formatting, shareURL: fileURL)
+            Group {
+                if review.tab == .changes, let presentation {
+                    changesPage(presentation, style: style)
+                } else {
+                    page(layout: layout, style: style)
                 }
-                .searchable(text: $findText, isPresented: $findPresented, placement: .toolbar, prompt: "Find")
-                .onSubmit(of: .search) { stepFind(forward: true) }
+            }
+            .toolbar(id: "mdown.editor") {
+                FormatToolbar(formatting: formatting, shareURL: fileURL)
+            }
+            .toolbar {
+                if let presentation {
+                    ToolbarItem(placement: .navigation) {
+                        reviewSwitcher(count: presentation.changes.count)
+                    }
+                }
+            }
+            .searchable(text: $findText, isPresented: $findPresented, placement: .toolbar, prompt: "Find")
+            .onSubmit(of: .search) { stepFind(forward: true) }
         }
         .navigationSubtitle(subtitle(blocks: blocks))
         .frame(minWidth: 680, minHeight: 420)
         .background {
             WindowReader { window in
                 OpenDocuments.shared.register(id: documentID, window: window, fileURL: fileURL)
+                reloader.window = window
             }
         }
         .focusedSceneValue(\.editorFormatting, formatting)
@@ -100,12 +126,19 @@ struct EditorView: View {
         }
         .onChange(of: fileURL) { _, url in
             OpenDocuments.shared.update(id: documentID, fileURL: url)
+            reloader.watch(url)
         }
         .onChange(of: document.text) { old, new in
             tracker.requestedHeadingLocation = nil
             documentChanged(from: old, to: new)
         }
+        .onChange(of: document.loadID) { _, id in
+            review.loadDidChange(to: id, text: document.text)
+        }
         .onAppear {
+            review.start(loadID: document.loadID, text: document.text)
+            reloader.contents = { document.text }
+            reloader.watch(fileURL)
             if document.text.isEmpty, editing == nil {
                 startNewBlock(at: 0)
             }
@@ -238,6 +271,7 @@ struct EditorView: View {
     }
 
     private func stepFind(forward: Bool) {
+        switchTab(.page)
         let matches = findMatches(in: parseCache.blocks(for: document.text))
         guard !matches.isEmpty else {
             NSSound.beep()
@@ -322,7 +356,12 @@ struct EditorView: View {
 
     // MARK: - Editing session
 
-    private func write(_ text: String) {
+    /// Stores text this view made. Your own edits are carried into a review's baseline so they never
+    /// show up as suggestions; a rejected change is not your edit, so it passes `carry: false`.
+    private func write(_ text: String, carry: Bool = true) {
+        if carry {
+            review.carry(from: document.text, to: text)
+        }
         writtenText = text
         if text != document.text {
             document.text = text
@@ -506,6 +545,7 @@ struct EditorView: View {
     /// The document changed without going through this view: undo, redo, Revert To, or the file
     /// changing on disk. Keep the open block anchored, or close it if it can't be found.
     private func documentChanged(from old: String, to new: String) {
+        review.textDidChange(from: old, to: new, loadID: document.loadID, ownWrite: new == writtenText)
         guard new != writtenText else { return }
         writtenText = new
         guard let current = editing else { return }
@@ -551,6 +591,126 @@ struct EditorView: View {
     }
     #endif
 
+    // MARK: - Review
+
+    /// Page | Changes, shown in the toolbar only while another app's changes wait for review.
+    private func reviewSwitcher(count: Int) -> some View {
+        Picker("View", selection: Binding(get: { review.tab }, set: { switchTab($0) })) {
+            Text("Page").tag(ReviewSession.Tab.page)
+            Text("Changes \(count)").tag(ReviewSession.Tab.changes)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .fixedSize()
+        .help("Another app changed this file. Review its changes to keep or undo each one.")
+    }
+
+    private func switchTab(_ tab: ReviewSession.Tab) {
+        guard review.tab != tab, tab == .page || review.isActive else { return }
+        if tab == .changes {
+            finishEditing()
+        }
+        review.tab = tab
+    }
+
+    private func changesPage(_ presentation: ReviewPresentation, style: PageStyle) -> some View {
+        let selected = review.selectedIndex(in: presentation)
+        return ScrollViewReader { proxy in
+            ScrollView {
+                ChangesPage(
+                    presentation: presentation,
+                    style: style,
+                    baseDirectory: fileURL?.deletingLastPathComponent(),
+                    selected: selected,
+                    actions: ReviewActions(
+                        select: { index in
+                            if presentation.changes.indices.contains(index) {
+                                review.selection = presentation.changes[index]
+                            }
+                        },
+                        accept: { decide($0, accept: true, in: presentation) },
+                        reject: { decide($0, accept: false, in: presentation) }
+                    )
+                )
+                .padding(.horizontal, 48)
+                .padding(.top, 32)
+                .padding(.bottom, 120)
+            }
+            .defaultScrollAnchor(.top)
+            .scrollEdgeEffectStyle(.soft, for: .top)
+            .onChange(of: changesScroll) { _, request in
+                guard let request else { return }
+                withAnimation(.smooth(duration: 0.3)) {
+                    proxy.scrollTo(request.row, anchor: request.anchor)
+                }
+            }
+        }
+        .overlay(alignment: .bottom) {
+            ReviewBar(
+                count: presentation.changes.count,
+                selected: selected,
+                step: { stepChange($0, in: presentation) },
+                acceptAll: { decide(Array(presentation.changes.indices), accept: true, in: presentation) },
+                rejectAll: { decide(Array(presentation.changes.indices), accept: false, in: presentation) }
+            )
+            .padding(.bottom, 18)
+        }
+        .background(Color(nsColor: style.colors.page))
+        .focusable()
+        .focusEffectDisabled()
+        .focused($changesFocused)
+        .onKeyPress(phases: .down) { press in
+            // Tab and Shift-Tab step through changes, Return accepts, Delete rejects. The Delete key
+            // arrives as U+007F, which isn't `KeyEquivalent.delete`.
+            if press.key == .tab {
+                stepChange(press.modifiers.contains(.shift) ? -1 : 1, in: presentation)
+            } else if press.key == .return, press.modifiers.isEmpty {
+                if let selected { decide([selected], accept: true, in: presentation) }
+            } else if press.modifiers.isEmpty,
+                      press.key == .delete || press.key == .deleteForward || press.characters == "\u{7F}" {
+                if let selected { decide([selected], accept: false, in: presentation) }
+            } else {
+                return .ignored
+            }
+            return .handled
+        }
+        .onAppear {
+            // After the switcher's click is done with focus, so Tab and Return reach the page.
+            DispatchQueue.main.async { changesFocused = true }
+        }
+    }
+
+    private func stepChange(_ delta: Int, in presentation: ReviewPresentation) {
+        let count = presentation.changes.count
+        guard count > 0 else { return }
+        let current = review.selectedIndex(in: presentation) ?? 0
+        let next = ((current + delta) % count + count) % count
+        review.selection = presentation.changes[next]
+        if let row = presentation.row(of: next) {
+            changesScroll = ChangesScroll(row: presentation.rows[row].id)
+        }
+    }
+
+    /// Accepts or rejects changes, then selects the change that follows them.
+    private func decide(_ indices: [Int], accept: Bool, in presentation: ReviewPresentation) {
+        let changes = indices.filter(presentation.changes.indices.contains).map { presentation.changes[$0] }
+        guard let first = changes.first else { return }
+        review.selection = first
+        var text = document.text
+        if accept {
+            review.accept(changes, current: text, undoManager: undoManager)
+        } else {
+            review.reject(changes, current: text, undoManager: undoManager) { rejected in
+                text = rejected
+                write(rejected, carry: false)
+            }
+            reloader.saveSoon()
+        }
+        if let next = review.presentation(for: text), let index = review.selectedIndex(in: next), let row = next.row(of: index) {
+            changesScroll = ChangesScroll(row: next.rows[row].id)
+        }
+    }
+
     // MARK: - Scrolling
 
     private func rowID(forLocation location: Int) -> PageRowID {
@@ -562,6 +722,13 @@ struct EditorView: View {
     }
 
     private func scroll(toHeading entry: OutlineEntry) {
+        if review.tab == .changes, let presentation = review.presentation(for: document.text) {
+            // The heading's row is the last one starting at or before it.
+            if let row = presentation.rows.last(where: { $0.location <= entry.utf16Location }) {
+                changesScroll = ChangesScroll(row: row.id, anchor: .top)
+            }
+            return
+        }
         tracker.requestedHeadingLocation = entry.utf16Location
         scrollRequest = ScrollRequest(id: rowID(forLocation: entry.utf16Location), anchor: .top)
     }

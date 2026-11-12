@@ -10,6 +10,9 @@ extension UTType {
 
 struct MarkdownDocument: FileDocument {
     var text: String
+    /// New each time the text is read from disk, so the editor can tell a reload (another app,
+    /// such as an AI tool, changed the file) from undo and redo, which keep the same value.
+    var loadID = UUID()
 
     init(text: String = "") {
         self.text = text

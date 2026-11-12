@@ -26,6 +26,9 @@
 		F00000000000000000000052 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = F00000000000000000000051 /* Sparkle */; };
 		F00000000000000000000054 /* AppUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000053 /* AppUpdater.swift */; };
 		F00000000000000000000056 /* DefaultMarkdownHelp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000055 /* DefaultMarkdownHelp.swift */; };
+		F0000000000000000000005A /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000059 /* FileWatcher.swift */; };
+		F0000000000000000000005C /* ReviewSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000005B /* ReviewSession.swift */; };
+		F0000000000000000000005E /* ChangesPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000005D /* ChangesPage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +51,9 @@
 		F0000000000000000000004A /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		F00000000000000000000053 /* AppUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdater.swift; sourceTree = "<group>"; };
 		F00000000000000000000055 /* DefaultMarkdownHelp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultMarkdownHelp.swift; sourceTree = "<group>"; };
+		F00000000000000000000059 /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcher.swift; sourceTree = "<group>"; };
+		F0000000000000000000005B /* ReviewSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSession.swift; sourceTree = "<group>"; };
+		F0000000000000000000005D /* ChangesPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesPage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +85,8 @@
 		F00000000000000000000012 /* Editor */ = {
 			isa = PBXGroup;
 			children = (
+				F0000000000000000000005B /* ReviewSession.swift */,
+				F00000000000000000000059 /* FileWatcher.swift */,
 				F00000000000000000000044 /* FormatToolbar.swift */,
 				F0000000000000000000002D /* Sidebar.swift */,
 				F00000000000000000000057 /* FolderBrowser.swift */,
@@ -90,6 +98,7 @@
 		F00000000000000000000013 /* Preview */ = {
 			isa = PBXGroup;
 			children = (
+				F0000000000000000000005D /* ChangesPage.swift */,
 				F00000000000000000000009 /* InlineContent.swift */,
 				F0000000000000000000002B /* InlineBlockEditor.swift */,
 				F0000000000000000000000B /* PageView.swift */,
@@ -223,6 +232,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0000000000000000000005E /* ChangesPage.swift in Sources */,
+				F0000000000000000000005C /* ReviewSession.swift in Sources */,
+				F0000000000000000000005A /* FileWatcher.swift in Sources */,
 				F00000000000000000000054 /* AppUpdater.swift in Sources */,
 				F00000000000000000000056 /* DefaultMarkdownHelp.swift in Sources */,
 				F0000000000000000000004B /* Typography.swift in Sources */,

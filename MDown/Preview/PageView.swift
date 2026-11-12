@@ -191,7 +191,7 @@ private struct BlockList: View {
     }
 }
 
-private struct BlockView: View {
+struct BlockView: View {
     var block: BlockNode
     var style: PageStyle
     var baseDirectory: URL?
